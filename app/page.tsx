@@ -217,7 +217,7 @@ export default function Home() {
           </div>
 
           {/* Slim ticker-style Industry Feed */}
-          <div className="mx-auto mt-1.5 mb-3 w-full max-w-[920px]">
+            <div className="mx-auto mt-1.5 mb-3 w-full max-w-[960px]">
             <div className="overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/12 bg-[#05131f]/88 px-3 py-2 shadow-[0_0_40px_rgba(14,165,233,0.08)]">
               <div className="flex items-center gap-4 text-sm text-[#D7E6FF]">
                 <div className="rounded-full border border-[#0ea5e9]/18 bg-[#0ea5e9]/8 px-2 py-0.5 text-[11px] uppercase tracking-[0.28em] text-[#B7D9FF]">
@@ -244,13 +244,13 @@ export default function Home() {
             </div>
             <style dangerouslySetInnerHTML={{ __html: `
               @keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-              .animate-marquee-left { animation: marquee-left 32s linear infinite; }
+                .animate-marquee-left { animation: marquee-left 24s linear infinite; }
               .animate-marquee-left:hover { animation-play-state: paused; }
             ` }} />
           </div>
 
           {/* Chat panel */}
-          <div className="mx-auto mt-3 w-full max-w-[860px]">
+            <div className="mx-auto mt-3 w-full max-w-[960px]">
             <div className="flex flex-col h-[420px] rounded-[1.5rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_20px_90px_rgba(10,132,255,0.12)] backdrop-blur-xl overflow-hidden">
               <div className="px-6 py-3 border-b border-white/8 text-left bg-[#07131f]/80">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A8D9FF]">Alex</div>
