@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
 import { industryFeed } from '@/lib/mockData';
 
+type FeedItem = (typeof industryFeed)[number];
+
 export default function Home() {
   const defaultNavItems = [
     { label: 'Home', icon: '⌂', href: '/' },
@@ -24,54 +26,61 @@ export default function Home() {
   ];
 
   const [navItems] = useState(defaultNavItems);
-  const [headline, setHeadline] = useState("What's the move?");
-  const [subheadline, setSubheadline] = useState("Talk to Alex — your AI music manager.");
   const [placeholder, setPlaceholder] = useState("Ask Alex anything about your music career...");
   const [suggestions, setSuggestions] = useState(defaultSuggestions);
-  const [feedItems, setFeedItems] = useState(industryFeed);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>(industryFeed);
   const [logoSize, setLogoSize] = useState(520);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
   const [messages, setMessages] = useState<{ id: string; role: 'user' | 'alex' | 'error'; text: string }[]>([]);
   const [errorText, setErrorText] = useState<string | null>(null);
+  const streamQueueRef = useRef('');
+  const streamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const storedHeadline = localStorage.getItem('headline');
-    if (storedHeadline) setHeadline(storedHeadline);
+    const hydrateStoredContent = () => {
+      const storedPlaceholder = localStorage.getItem('placeholder');
+      if (storedPlaceholder) setPlaceholder(storedPlaceholder);
 
-    const storedSubheadline = localStorage.getItem('subheadline');
-    if (storedSubheadline) setSubheadline(storedSubheadline);
-
-    const storedPlaceholder = localStorage.getItem('placeholder');
-    if (storedPlaceholder) setPlaceholder(storedPlaceholder);
-
-    const storedSuggestions = localStorage.getItem('suggestions');
-    if (storedSuggestions) {
-      setSuggestions(storedSuggestions.split('\n').filter(s => s.trim()));
-    }
-
-    const storedFeedItems = localStorage.getItem('feedItems');
-    if (storedFeedItems) {
-      try {
-        const parsed = JSON.parse(storedFeedItems);
-        if (Array.isArray(parsed) && parsed.length && typeof parsed[0] === 'object') {
-          setFeedItems(parsed as any);
-        } else if (Array.isArray(parsed)) {
-          // array of strings -> convert to objects
-          setFeedItems(parsed.map((t: string, i: number) => ({ id: `stored-${i}`, title: String(t) })));
-        } else {
-          // fallback to newline-split
-          setFeedItems(storedFeedItems.split('\n').filter((s) => s.trim()).map((t) => ({ id: t.slice(0, 40).replace(/[^a-z0-9]+/gi, '-').toLowerCase(), title: t })));
-        }
-      } catch (e) {
-        // not JSON, treat as newline-separated titles
-        setFeedItems(storedFeedItems.split('\n').filter((s) => s.trim()).map((t, i) => ({ id: `stored-${i}`, title: t })));
+      const storedSuggestions = localStorage.getItem('suggestions');
+      if (storedSuggestions) {
+        setSuggestions(storedSuggestions.split('\n').filter(s => s.trim()));
       }
-    }
 
-    const storedLogoSize = localStorage.getItem('logoSize');
-    if (storedLogoSize) setLogoSize(parseInt(storedLogoSize));
-    else setLogoSize(520);
+      const storedFeedItems = localStorage.getItem('feedItems');
+      if (storedFeedItems) {
+        try {
+          const parsed = JSON.parse(storedFeedItems) as unknown;
+          if (Array.isArray(parsed) && parsed.length && typeof parsed[0] === 'object') {
+            setFeedItems(parsed.filter((item): item is FeedItem => (
+              typeof item === 'object' &&
+              item !== null &&
+              'id' in item &&
+              'title' in item &&
+              typeof item.id === 'string' &&
+              typeof item.title === 'string'
+            )));
+          } else if (Array.isArray(parsed)) {
+            // array of strings -> convert to objects
+            setFeedItems(parsed.map((t, i) => ({ id: `stored-${i}`, title: String(t) })));
+          } else {
+            // fallback to newline-split
+            setFeedItems(storedFeedItems.split('\n').filter((s) => s.trim()).map((t) => ({ id: t.slice(0, 40).replace(/[^a-z0-9]+/gi, '-').toLowerCase(), title: t })));
+          }
+        } catch {
+          // not JSON, treat as newline-separated titles
+          setFeedItems(storedFeedItems.split('\n').filter((s) => s.trim()).map((t, i) => ({ id: `stored-${i}`, title: t })));
+        }
+      }
+
+      const storedLogoSize = localStorage.getItem('logoSize');
+      if (storedLogoSize) setLogoSize(parseInt(storedLogoSize));
+      else setLogoSize(520);
+    };
+
+    const hydrationTimer = window.setTimeout(hydrateStoredContent, 0);
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
   const historyRef = useRef<HTMLDivElement | null>(null);
@@ -82,6 +91,40 @@ export default function Home() {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
     }
   }, [messages, isLoading]);
+
+  useEffect(() => {
+    return () => {
+      if (streamTimerRef.current) clearTimeout(streamTimerRef.current);
+    };
+  }, []);
+
+  const flushAssistantStream = (assistantId: string) => {
+    if (streamTimerRef.current) {
+      clearTimeout(streamTimerRef.current);
+      streamTimerRef.current = null;
+    }
+
+    if (!streamQueueRef.current) return;
+
+    const queuedText = streamQueueRef.current;
+    streamQueueRef.current = '';
+    setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + queuedText } : pm));
+  };
+
+  const appendAssistantDelta = (assistantId: string, delta: string) => {
+    streamQueueRef.current += delta;
+
+    if (streamTimerRef.current) return;
+
+    streamTimerRef.current = setTimeout(() => {
+      streamTimerRef.current = null;
+      if (!streamQueueRef.current) return;
+
+      const queuedText = streamQueueRef.current;
+      streamQueueRef.current = '';
+      setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + queuedText } : pm));
+    }, 70);
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -94,8 +137,10 @@ export default function Home() {
     const assistantId = `a-${Date.now()}`;
     const assistantMsg = { id: assistantId, role: 'alex' as const, text: '' };
 
+    streamQueueRef.current = '';
     setMessages((m) => [...m, userMsg, assistantMsg]);
     setIsLoading(true);
+    setStreamingMessageId(assistantId);
 
     try {
       console.log('Sending message to /api/chat', userText);
@@ -141,9 +186,9 @@ export default function Home() {
               const parsed = JSON.parse(m);
               const delta = parsed.choices?.[0]?.delta?.content;
               if (delta) {
-                setMessages((prev) => prev.map(pm => pm.id === assistantId ? { ...pm, text: pm.text + delta } : pm));
+                appendAssistantDelta(assistantId, delta);
               }
-            } catch (e) {
+            } catch {
               // ignore non-json lines
             }
           }
@@ -159,12 +204,13 @@ export default function Home() {
             const parsed = JSON.parse(l);
             const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
-              setMessages((prev) => prev.map(pm => pm.id === assistantId ? { ...pm, text: pm.text + delta } : pm));
+              appendAssistantDelta(assistantId, delta);
             }
-          } catch (e) {}
+          } catch {}
         }
       }
 
+      flushAssistantStream(assistantId);
       console.log('Chat response stream finished');
     } catch (err) {
       console.error('Failed to send message:', err);
@@ -172,7 +218,9 @@ export default function Home() {
       setErrorText(msg);
       setMessages((m) => m.map(pm => pm.role === 'alex' && pm.text === '' ? { ...pm, text: `Error: ${msg}` } : pm));
     } finally {
+      flushAssistantStream(assistantId);
       setIsLoading(false);
+      setStreamingMessageId(null);
     }
   };
 
@@ -204,25 +252,22 @@ export default function Home() {
         </div>
       </aside>
 
-      <section className="flex min-h-screen items-center justify-center px-8 pl-48">
+      <section className="flex min-h-screen items-center justify-center px-8 py-8 pl-48">
         <div className="w-full max-w-[1080px] text-center">
-          <div className="mb-8 relative">
-            <div className="mb-3 flex items-center justify-center">
+          <div className="relative mb-4 flex flex-col items-center">
+            <div className="mb-2 flex w-full items-center justify-center">
               <img src="/aim-logo-v2.svg" alt="AIM" style={{ width: logoSize, height: 'auto' }} className="object-contain" />
             </div>
-            <p className="text-base uppercase tracking-[0.35em] text-[#B7C8DA]">
+            <p className="text-center text-base uppercase tracking-[0.35em] text-[#B7C8DA]">
               YOUR PARTNER IN THE MUSIC INDUSTRY
             </p>
 
           </div>
 
           {/* Slim ticker-style Industry Feed */}
-            <div className="mx-auto mt-1.5 mb-3 w-full max-w-[960px]">
+          <div className="mx-auto mb-2 mt-0 w-full max-w-[960px]">
             <div className="overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/12 bg-[#05131f]/88 px-3 py-2 shadow-[0_0_40px_rgba(14,165,233,0.08)]">
-              <div className="flex items-center gap-4 text-sm text-[#D7E6FF]">
-                <div className="rounded-full border border-[#0ea5e9]/18 bg-[#0ea5e9]/8 px-2 py-0.5 text-[11px] uppercase tracking-[0.28em] text-[#B7D9FF]">
-                  LIVE
-                </div>
+              <div className="flex items-center text-sm text-[#D7E6FF]">
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <div className="flex gap-4 animate-marquee-left hover:animation-play-state-paused whitespace-nowrap text-sm text-[#E7F1FF]">
                     {feedItems.concat(feedItems).map((item, index) => {
@@ -244,47 +289,52 @@ export default function Home() {
             </div>
             <style dangerouslySetInnerHTML={{ __html: `
               @keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-                .animate-marquee-left { animation: marquee-left 24s linear infinite; }
+                .animate-marquee-left { animation: marquee-left 20s linear infinite; }
               .animate-marquee-left:hover { animation-play-state: paused; }
             ` }} />
           </div>
 
           {/* Chat panel */}
-            <div className="mx-auto mt-3 w-full max-w-[960px]">
-            <div className="flex flex-col h-[420px] rounded-[1.5rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_20px_90px_rgba(10,132,255,0.12)] backdrop-blur-xl overflow-hidden">
-              <div className="px-6 py-3 border-b border-white/8 text-left bg-[#07131f]/80">
+          <div className="mx-auto mt-2 w-full max-w-[960px]">
+            <div className="flex h-[390px] max-h-[45vh] min-h-[360px] flex-col overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_20px_90px_rgba(10,132,255,0.12)] backdrop-blur-xl">
+              <div className="border-b border-white/8 bg-[#07131f]/80 px-6 py-3 text-left">
                 <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A8D9FF]">Alex</div>
-                <div className="mt-1 text-sm leading-7 text-[#E8F4FF] font-medium">
+                <div className="mt-1 text-sm font-medium leading-6 text-[#E8F4FF]">
                   Morning. What are we moving forward today — release, promo, or strategy?
                 </div>
               </div>
 
-              <div ref={historyRef} className="flex-1 overflow-y-auto p-5 space-y-2.5">
+              <div ref={historyRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-5">
                 {messages.map((m) => (
-                  <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div key={m.id} className="flex justify-start">
                     <div className={
                       m.role === 'user'
-                        ? 'rounded-[1.25rem] px-4 py-2.5 bg-[#0ea5e9] text-black text-sm leading-6 max-w-[80%] shadow-[0_6px_20px_rgba(14,165,233,0.12)]'
+                        ? 'max-w-[82%] rounded-[1.15rem] border border-[#0ea5e9]/22 bg-[#0ea5e9]/14 px-4 py-3 text-left text-sm leading-7 text-[#F2FAFF] shadow-[0_8px_24px_rgba(14,165,233,0.08)]'
                         : m.role === 'alex'
-                        ? 'rounded-[1.25rem] px-4 py-2.5 bg-white/[0.03] border border-white/8 text-[#D7E6FF] text-sm leading-6 max-w-[80%] shadow-[0_6px_20px_rgba(10,132,255,0.06)]'
-                        : 'rounded-[1.25rem] px-4 py-2.5 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-sm leading-6 max-w-[80%]'
+                        ? 'max-w-[86%] rounded-[1.15rem] border border-white/8 bg-white/[0.035] px-4 py-3 text-left text-sm leading-7 text-[#D7E6FF] shadow-[0_8px_24px_rgba(10,132,255,0.05)]'
+                        : 'max-w-[86%] rounded-[1.15rem] border border-[#ff4d4f]/20 bg-[#ff4d4f]/10 px-4 py-3 text-left text-sm leading-7 text-[#ffb3b3]'
                     }>
-                      <div className="whitespace-pre-wrap break-words text-left">{m.text}{isLoading && m.role === 'alex' ? <span className="inline-block ml-2 h-4 w-1 rounded-full bg-white animate-pulse" /> : null}</div>
+                      <div className="whitespace-pre-wrap break-words">
+                        {m.text}
+                        {isLoading && m.id === streamingMessageId ? (
+                          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-[#BFE5FF] align-middle opacity-80 animate-pulse" />
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 ))}
                 {errorText ? <div className="text-sm text-[#ffb3b3]">{errorText}</div> : null}
               </div>
-              <div className="px-5 py-2.5 border-t border-white/8 bg-[#050f19]/90">
-                <div className="mb-2 flex gap-1.5 items-center overflow-x-auto whitespace-nowrap">
+              <div className="flex-shrink-0 border-t border-white/8 bg-[#050f19]/92 px-5 py-3">
+                <div className="mb-2 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
                   {suggestions.map((s) => (
-                    <button key={s} className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-2.5 py-0.5 text-[11px] font-medium tracking-[0.08em] text-[#D7E6FF] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/18" onClick={() => setInputValue(s)}>{s}</button>
+                    <button key={s} className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-2.5 py-1 text-[11px] font-medium tracking-[0.08em] text-[#D7E6FF] transition hover:border-[#0ea5e9]/18 hover:bg-[#0ea5e9]/10" onClick={() => setInputValue(s)}>{s}</button>
                   ))}
                 </div>
 
                 <div className="flex items-center gap-2.5">
                   <textarea
-                    className="flex-1 min-h-[56px] resize-none rounded-[0.875rem] border border-white/12 bg-[#03101b]/96 px-4 py-2.5 text-sm text-white outline-none placeholder:text-[#C6E1FF] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/12"
+                    className="min-h-[54px] flex-1 resize-none rounded-[0.875rem] border border-white/12 bg-[#03101b]/96 px-4 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-[#C6E1FF] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/12"
                     placeholder={placeholder}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
