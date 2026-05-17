@@ -217,10 +217,10 @@ export default function Home() {
           </div>
 
           {/* Slim ticker-style Industry Feed */}
-          <div className="mx-auto mt-4 mb-5 w-full max-w-[860px]">
-            <div className="overflow-hidden rounded-[2rem] border border-[#0ea5e9]/15 bg-[#05131f]/90 px-4 py-3 shadow-[0_0_60px_rgba(14,165,233,0.10)]">
+          <div className="mx-auto mt-2 mb-4 w-full max-w-[920px]">
+            <div className="overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/12 bg-[#05131f]/88 px-3 py-2 shadow-[0_0_40px_rgba(14,165,233,0.08)]">
               <div className="flex items-center gap-4 text-sm text-[#D7E6FF]">
-                <div className="rounded-full border border-[#0ea5e9]/20 bg-[#0ea5e9]/10 px-3 py-1 text-[11px] uppercase tracking-[0.35em] text-[#B7D9FF]">
+                <div className="rounded-full border border-[#0ea5e9]/18 bg-[#0ea5e9]/8 px-2 py-0.5 text-[11px] uppercase tracking-[0.28em] text-[#B7D9FF]">
                   LIVE
                 </div>
                 <div className="min-w-0 flex-1 overflow-hidden">
@@ -250,24 +250,24 @@ export default function Home() {
           </div>
 
           {/* Chat panel */}
-          <div className="mx-auto mt-6 w-full max-w-[820px]">
-            <div className="flex flex-col h-[600px] rounded-[1.75rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_24px_100px_rgba(10,132,255,0.14)] backdrop-blur-xl overflow-hidden">
-              <div className="px-7 py-5 border-b border-white/8 text-left bg-[#07131f]/80">
-                <div className="text-sm font-semibold uppercase tracking-[0.2em] text-[#A8D9FF]">Alex</div>
-                <div className="mt-2 text-sm leading-7 text-[#E8F4FF] font-medium">
+          <div className="mx-auto mt-4 w-full max-w-[860px]">
+            <div className="flex flex-col h-[580px] rounded-[1.5rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_20px_90px_rgba(10,132,255,0.12)] backdrop-blur-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/8 text-left bg-[#07131f]/80">
+                <div className="text-sm font-semibold uppercase tracking-[0.16em] text-[#A8D9FF]">Alex</div>
+                <div className="mt-1 text-sm leading-7 text-[#E8F4FF] font-semibold">
                   Morning. What are we moving forward today — release, promo, or strategy?
                 </div>
               </div>
 
-              <div ref={historyRef} className="flex-1 overflow-y-auto p-7 space-y-4">
+              <div ref={historyRef} className="flex-1 overflow-y-auto p-6 space-y-3">
                 {messages.map((m) => (
                   <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={
                       m.role === 'user'
-                        ? 'rounded-[1.5rem] px-5 py-3 bg-[#0ea5e9] text-black text-base leading-7 max-w-[80%] shadow-[0_8px_30px_rgba(14,165,233,0.14)]'
+                        ? 'rounded-[1.25rem] px-4 py-2.5 bg-[#0ea5e9] text-black text-base leading-7 max-w-[80%] shadow-[0_6px_20px_rgba(14,165,233,0.12)]'
                         : m.role === 'alex'
-                        ? 'rounded-[1.5rem] px-5 py-3 bg-white/[0.03] border border-white/8 text-[#D7E6FF] text-base leading-7 max-w-[80%] shadow-[0_8px_30px_rgba(10,132,255,0.08)]'
-                        : 'rounded-[1.5rem] px-5 py-3 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-base leading-7 max-w-[80%]'
+                        ? 'rounded-[1.25rem] px-4 py-2.5 bg-white/[0.03] border border-white/8 text-[#D7E6FF] text-base leading-7 max-w-[80%] shadow-[0_6px_20px_rgba(10,132,255,0.06)]'
+                        : 'rounded-[1.25rem] px-4 py-2.5 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-base leading-7 max-w-[80%]'
                     }>
                       <div className="whitespace-pre-wrap break-words">{m.text}{isLoading && m.role === 'alex' ? <span className="inline-block ml-2 h-4 w-1 rounded-full bg-white animate-pulse" /> : null}</div>
                     </div>
@@ -275,17 +275,16 @@ export default function Home() {
                 ))}
                 {errorText ? <div className="text-sm text-[#ffb3b3]">{errorText}</div> : null}
               </div>
-
-              <div className="px-5 py-4 border-t border-white/8 bg-[#050f19]/90">
-                <div className="mb-3 flex flex-wrap gap-2">
+              <div className="px-5 py-3 border-t border-white/8 bg-[#050f19]/90">
+                <div className="mb-2 flex gap-2 items-center overflow-x-auto whitespace-nowrap">
                   {suggestions.map((s) => (
-                    <button key={s} className="rounded-full border border-[#0ea5e9]/15 bg-[#0ea5e9]/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#D7E6FF] transition hover:bg-[#0ea5e9]/15" onClick={() => setInputValue(s)}>{s}</button>
+                    <button key={s} className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-3 py-1 text-[12px] font-medium tracking-[0.08em] text-[#D7E6FF] hover:bg-[#0ea5e9]/10 hover:border-[#0ea5e9]/18" onClick={() => setInputValue(s)}>{s}</button>
                   ))}
                 </div>
 
                 <div className="flex items-center gap-3">
                   <textarea
-                    className="flex-1 min-h-[58px] resize-none rounded-[1.25rem] border border-white/10 bg-[#03101b]/95 px-4 py-3 text-base text-white outline-none placeholder:text-[#AFC9E6] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/15"
+                    className="flex-1 min-h-[64px] resize-none rounded-[1rem] border border-white/12 bg-[#03101b]/96 px-4 py-3 text-base text-white outline-none placeholder:text-[#C6E1FF] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/12"
                     placeholder={placeholder}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
