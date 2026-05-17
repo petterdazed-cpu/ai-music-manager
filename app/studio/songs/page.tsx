@@ -3,19 +3,25 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 import { studioSongs as defaultSongs, type Song } from '@/lib/mockData';
 
 const storageKey = 'aimStudioSongs';
 
 export default function StudioSongsPage() {
   const [uploadedSongs, setUploadedSongs] = useState<Song[]>([]);
+  const [uploadStatus, setUploadStatus] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey);
-    if (stored) {
-      setUploadedSongs(JSON.parse(stored) as Song[]);
-    }
+    const hydrationTimer = window.setTimeout(() => {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        setUploadedSongs(JSON.parse(stored) as Song[]);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
   const songs = [...defaultSongs, ...uploadedSongs];
@@ -46,6 +52,7 @@ export default function StudioSongsPage() {
     const nextUploads = [...uploadedSongs, ...newSongs];
     setUploadedSongs(nextUploads);
     window.localStorage.setItem(storageKey, JSON.stringify(nextUploads));
+    setUploadStatus(`${newSongs.length} song${newSongs.length === 1 ? '' : 's'} uploaded. Alex created a metadata review task.`);
     event.target.value = '';
   };
 
@@ -78,6 +85,11 @@ export default function StudioSongsPage() {
               className="hidden"
               onChange={handleUpload}
             />
+            {uploadStatus ? (
+              <div className="mt-5 rounded-[1.5rem] border border-[#0ea5e9]/15 bg-[#061229]/95 px-4 py-3 text-sm text-[#D7E6FF]">
+                {uploadStatus}
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-4">
@@ -116,9 +128,14 @@ export default function StudioSongsPage() {
             </div>
             <div className="mt-6 grid gap-3">
               {['Build release plan', 'Draft outreach', 'Move to release', 'Review artwork needs'].map((label) => (
-                <button key={label} className="rounded-full bg-[#0ea5ff]/10 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15">
-                  {label}
-                </button>
+                <PrototypeAction
+                  key={label}
+                  label={label}
+                  result={label.includes('Draft') ? 'Draft created' : 'Task created'}
+                  title={`${label} ready`}
+                  message={`Alex prepared a prototype ${label.toLowerCase()} workflow for your songs library.`}
+                  className="rounded-full bg-[#0ea5ff]/10 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15"
+                />
               ))}
             </div>
           </div>

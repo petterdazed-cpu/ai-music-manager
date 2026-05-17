@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { careerTimeline, contacts } from '@/lib/mockData';
+import PrototypeAction from '@/components/PrototypeAction';
+import { careerTimeline, contacts, industryFeed } from '@/lib/mockData';
 
 type Stat = {
   label: string;
@@ -13,16 +14,17 @@ export function QuickActions() {
       <p className="text-xs uppercase tracking-[0.3em] text-[#8ec6ff]">Quick actions</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {['Plan Release', 'Write Email', 'Set Goal', 'Ask Alex'].map((label) => (
-          <button
+          <PrototypeAction
             key={label}
-            type="button"
+            label={label}
+            result={label === 'Write Email' ? 'Draft created' : label === 'Set Goal' ? 'Goal created' : 'Task created'}
+            title={`${label} prototype ready`}
+            message={`Alex prepared a ${label.toLowerCase()} next step and added it to your career workspace.`}
             className="rounded-[1.5rem] border border-[#1E90FF]/15 bg-[#0b1c33]/95 px-4 py-4 text-left text-sm font-semibold text-[#E6F2FF] transition hover:border-[#1E90FF]/30 hover:bg-[#102a4e]"
-          >
-            {label}
-          </button>
+          />
         ))}
       </div>
-      <p className="mt-5 text-xs text-[#B7C8DA]">TODO: wire quick actions to career routines, email drafts, release planning and Alex prompts.</p>
+      <p className="mt-5 text-xs text-[#B7C8DA]">Prototype actions create drafts, tasks and Alex suggestions instantly.</p>
     </div>
   );
 }
@@ -143,14 +145,6 @@ export function RecentActivityCard() {
 }
 
 export function IndustryFeedCard() {
-  const feed = [
-    'Spotify tests AI playlist pitching',
-    'Indie artist revenue trends',
-    'Playlist submission opportunities',
-    'Sync opportunity alerts',
-    'Touring insights',
-  ];
-
   return (
     <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#020611]/95 p-6 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
       <div className="mb-5 flex items-center justify-between gap-3">
@@ -158,13 +152,17 @@ export function IndustryFeedCard() {
         <span className="rounded-full bg-[#0ea5e9]/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-[#AED7FF]">Insights</span>
       </div>
       <div className="space-y-4 max-h-[340px] overflow-y-auto pr-2 text-sm text-[#D7E6FF]">
-        {feed.map((item) => (
-          <div key={item} className="rounded-[1.75rem] border border-white/10 bg-[#08111f]/90 px-4 py-4 shadow-[0_10px_30px_rgba(10,132,255,0.08)]">
-            {item}
-          </div>
+        {industryFeed.slice(0, 5).map((item) => (
+          <Link
+            key={item.id}
+            href={`/opportunities/${item.id}`}
+            className="block rounded-[1.75rem] border border-white/10 bg-[#08111f]/90 px-4 py-4 shadow-[0_10px_30px_rgba(10,132,255,0.08)] transition hover:border-[#0ea5ff]/30 hover:bg-[#0ea5ff]/10"
+          >
+            {item.title}
+          </Link>
         ))}
       </div>
-      <p className="mt-5 text-xs text-[#B7C8DA]">TODO: integrate playlist tracking, revenue alerts and SMS-ready artist notifications.</p>
+      <p className="mt-5 text-xs text-[#B7C8DA]">Open any lead to review source, deadline, contact info and Alex outreach suggestions.</p>
     </div>
   );
 }
@@ -235,9 +233,9 @@ export function CheckInsCard() {
         ))}
       </div>
       <div className="mt-6 flex flex-wrap gap-3">
-        <button className="rounded-full bg-[#0ea5ff] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">Reply</button>
-        <button className="rounded-full bg-white/5 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10">Snooze</button>
-        <button className="rounded-full bg-[#1f2a3f] px-4 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10">Turn into task</button>
+        <PrototypeAction label="Reply" result="Reply drafted" title="Check-in reply drafted" message="Alex drafted a concise response you can refine before sending." className="rounded-full bg-[#0ea5ff] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]" />
+        <PrototypeAction label="Snooze" result="Snoozed" title="Check-in snoozed" message="Alex will bring this back into focus tomorrow morning." className="rounded-full bg-white/5 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10" />
+        <PrototypeAction label="Turn into task" result="Task created" title="Manager task created" message="Alex turned this check-in into a prototype task with a next action." className="rounded-full bg-[#1f2a3f] px-4 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10" />
       </div>
     </div>
   );

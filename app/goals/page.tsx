@@ -1,4 +1,5 @@
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 
 const goals = [
   { title: 'Weekly rehearsals', progress: 66, detail: '2 / 3 rehearsals this week' },
@@ -22,9 +23,12 @@ export default function GoalsPage() {
               <h2 className="text-2xl font-semibold">Your active goals</h2>
               <p className="mt-2 text-sm text-[#B7C8DA]">Track progress, routines and momentum as you move toward your next release.</p>
             </div>
-            <button className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">
-              Create new goal
-            </button>
+            <PrototypeAction
+              label="Create new goal"
+              result="Goal created"
+              title="New goal draft created"
+              message="Alex created a prototype goal with weekly check-ins, a progress target and a suggested next action."
+            />
           </div>
         </div>
 

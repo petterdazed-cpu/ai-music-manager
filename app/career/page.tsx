@@ -1,4 +1,5 @@
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 import {
   CheckInsCard,
   ContactCRMCard,
@@ -26,13 +27,14 @@ export default function CareerPage() {
             <p className="mt-4 max-w-xl text-lg text-[#B7C8DA]">Your music. Your momentum. Your manager.</p>
             <div className="mt-8 flex flex-wrap gap-3">
               {['Plan Release', 'Write Email', 'Set Goal', 'Ask Alex'].map((action) => (
-                <button
+                <PrototypeAction
                   key={action}
-                  type="button"
+                  label={action}
+                  result={action === 'Write Email' ? 'Draft created' : action === 'Set Goal' ? 'Goal created' : 'Task created'}
+                  title={`${action} prototype ready`}
+                  message={`Alex prepared a ${action.toLowerCase()} next step for your career dashboard.`}
                   className="rounded-full bg-[#1E90FF]/12 px-5 py-3 text-sm font-semibold text-[#E9F4FF] transition hover:bg-[#1E90FF]/20"
-                >
-                  {action}
-                </button>
+                />
               ))}
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">

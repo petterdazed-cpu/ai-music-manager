@@ -2,19 +2,25 @@
 
 import { useEffect, useRef, useState } from 'react';
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 import { studioArtwork as defaultArtwork, type ArtworkAsset } from '@/lib/mockData';
 
 const storageKey = 'aimStudioArtwork';
 
 export default function StudioArtworkPage() {
   const [uploadedArtwork, setUploadedArtwork] = useState<ArtworkAsset[]>([]);
+  const [uploadStatus, setUploadStatus] = useState('');
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey);
-    if (stored) {
-      setUploadedArtwork(JSON.parse(stored) as ArtworkAsset[]);
-    }
+    const hydrationTimer = window.setTimeout(() => {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        setUploadedArtwork(JSON.parse(stored) as ArtworkAsset[]);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
   const assets = [...defaultArtwork, ...uploadedArtwork];
@@ -34,7 +40,14 @@ export default function StudioArtworkPage() {
 
     const updated = [...uploadedArtwork, ...nextUploads];
     setUploadedArtwork(updated);
-    window.localStorage.setItem(storageKey, JSON.stringify(updated.map(({ previewUrl, ...rest }) => rest)));
+    window.localStorage.setItem(storageKey, JSON.stringify(updated.map((asset) => ({
+      id: asset.id,
+      title: asset.title,
+      type: asset.type,
+      uploadedDate: asset.uploadedDate,
+      status: asset.status,
+    }))));
+    setUploadStatus(`${nextUploads.length} artwork asset${nextUploads.length === 1 ? '' : 's'} uploaded. Alex queued a campaign visual review.`);
     event.target.value = '';
   };
 
@@ -67,6 +80,11 @@ export default function StudioArtworkPage() {
               className="hidden"
               onChange={handleUpload}
             />
+            {uploadStatus ? (
+              <div className="mt-5 rounded-[1.5rem] border border-[#0ea5e9]/15 bg-[#061229]/95 px-4 py-3 text-sm text-[#D7E6FF]">
+                {uploadStatus}
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -100,9 +118,14 @@ export default function StudioArtworkPage() {
                 'Resize for TikTok',
                 'Generate campaign variations',
               ].map((feature) => (
-                <div key={feature} className="rounded-[1.75rem] bg-[#061229]/95 px-4 py-4">
-                  {feature}
-                </div>
+                <PrototypeAction
+                  key={feature}
+                  label={feature}
+                  result="Visual task created"
+                  title={`${feature} queued`}
+                  message="Alex created a prototype visual task and added it to the artwork workflow."
+                  className="rounded-[1.75rem] bg-[#061229]/95 px-4 py-4 text-left transition hover:bg-[#0ea5ff]/10"
+                />
               ))}
             </div>
           </div>

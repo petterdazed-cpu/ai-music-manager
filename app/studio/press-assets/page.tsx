@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 import { pressAssets as defaultPressAssets, type PressAssets } from '@/lib/mockData';
 
 const storageKey = 'aimPressAssets';
@@ -10,10 +11,14 @@ export default function StudioPressAssetsPage() {
   const [pressAssets, setPressAssets] = useState<PressAssets>(defaultPressAssets);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(storageKey);
-    if (stored) {
-      setPressAssets(JSON.parse(stored) as PressAssets);
-    }
+    const hydrationTimer = window.setTimeout(() => {
+      const stored = window.localStorage.getItem(storageKey);
+      if (stored) {
+        setPressAssets(JSON.parse(stored) as PressAssets);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
   const handleChange = (field: keyof PressAssets, value: string) => {
@@ -130,9 +135,14 @@ export default function StudioPressAssetsPage() {
                 className="w-full rounded-3xl border border-[#0ea5e9]/15 bg-[#0c1729]/95 px-4 py-3 text-sm text-white outline-none"
               />
             </div>
-            <button className="mt-6 w-full rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">
-              Export preview
-            </button>
+            <PrototypeAction
+              label="Export preview"
+              result="Preview exported"
+              title="Press preview created"
+              message="Alex created a prototype press kit preview with your current bio, one sheet and contact details."
+              fullWidth
+              className="mt-6 w-full rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+            />
           </div>
         </aside>
       </div>

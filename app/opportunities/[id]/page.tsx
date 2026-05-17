@@ -1,6 +1,6 @@
-import Link from 'next/link';
 import SectionLayout from '@/components/SectionLayout';
-import { opportunities } from '@/lib/mockData';
+import PrototypeAction from '@/components/PrototypeAction';
+import { opportunities, type Opportunity } from '@/lib/mockData';
 
 type OpportunityDetailProps = {
   params: {
@@ -9,20 +9,7 @@ type OpportunityDetailProps = {
 };
 
 export default function OpportunityDetailPage({ params }: OpportunityDetailProps) {
-  const opportunity = opportunities.find((item) => item.id === params.id);
-
-  if (!opportunity) {
-    return (
-      <SectionLayout title="Opportunity not found" subtitle="The opportunity you selected could not be found.">
-        <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-8 text-center text-[#B7C8DA]">
-          <p>Try returning to the industry feed or checking another opportunity.</p>
-          <Link href="/opportunities" className="mt-5 inline-flex rounded-full bg-[#0ea5ff] px-6 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">
-            Browse opportunities
-          </Link>
-        </div>
-      </SectionLayout>
-    );
-  }
+  const opportunity = opportunities.find((item) => item.id === params.id) || createPrototypeOpportunity(params.id);
 
   return (
     <SectionLayout title="Opportunity detail" subtitle={opportunity.headline}>
@@ -61,6 +48,12 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
                 ))}
               </div>
             </div>
+            <div className="mt-8 rounded-[1.75rem] border border-[#0ea5e9]/12 bg-[#06152a]/95 p-5">
+              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Recommended next step</p>
+              <p className="mt-3 text-sm leading-6 text-[#D7E6FF]">
+                Ask Alex to draft a concise outreach note, attach the strongest live clip or press asset, and turn the deadline into a follow-up task.
+              </p>
+            </div>
           </div>
 
           <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-8 shadow-[0_20px_90px_rgba(10,132,255,0.16)] backdrop-blur-xl">
@@ -71,10 +64,10 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
               <p><span className="font-semibold text-white">Submission deadline:</span> {opportunity.deadline}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">Draft submission email</button>
-              <button className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10">Build press kit</button>
-              <button className="rounded-full bg-[#1a1f2d] px-5 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10">Save for later</button>
-              <button className="rounded-full bg-[#0d1b32] px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/10">Turn into task</button>
+              <PrototypeAction label="Draft submission email" result="Draft created" title="Submission email drafted" message={`Alex drafted outreach for ${opportunity.source} and queued it with this opportunity's deadline.`} />
+              <PrototypeAction label="Build press kit" result="Press kit started" title="Press kit draft created" message="A prototype press kit checklist is ready with bio, artwork, link, and live proof placeholders." className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10" />
+              <PrototypeAction label="Save for later" result="Saved" title="Opportunity saved" message="This opportunity was saved to your AIM follow-up queue." className="rounded-full bg-[#1a1f2d] px-5 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10" />
+              <PrototypeAction label="Turn into task" result="Task created" title="Opportunity task created" message="Alex created a prototype task with the deadline, source, and next action." className="rounded-full bg-[#0d1b32] px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/10" />
             </div>
           </div>
         </div>
@@ -94,8 +87,8 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
               ))}
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <button className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">Draft submission email</button>
-              <button className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10">Turn into task</button>
+              <PrototypeAction label="Want me to draft outreach?" result="Draft created" title="Outreach draft ready" message={`Alex drafted a focused note for ${opportunity.source}, tailored to ${opportunity.type} fit and deadline urgency.`} />
+              <PrototypeAction label="Turn into task" result="Task created" title="Follow-up task created" message="Alex added a prototype deadline task and recommended next move." className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10" />
             </div>
           </div>
 
@@ -111,4 +104,28 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
       </div>
     </SectionLayout>
   );
+}
+
+function createPrototypeOpportunity(id: string): Opportunity {
+  const readableTitle = decodeURIComponent(id)
+    .replace(/^feed-\d+$/, 'Fresh industry opportunity')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+
+  return {
+    id,
+    headline: readableTitle,
+    source: 'AIM Industry Desk',
+    sourceLogo: '/logos/aim.svg',
+    date: '2026-05-17',
+    location: 'Remote',
+    genres: ['Pop', 'Electronic', 'Independent'],
+    type: 'press',
+    email: 'opportunities@aim.prototype',
+    website: 'https://aim.prototype/opportunities',
+    deadline: '2026-06-07',
+    requiredAssets: ['Short bio', 'Recent song link', 'Press image', 'One-line pitch'],
+    summary: 'AIM created a prototype opportunity view for this feed item so the lead can be reviewed, saved and turned into outreach without hitting a dead end.',
+    relevance: 'Prototype match based on your current artist profile.',
+  };
 }

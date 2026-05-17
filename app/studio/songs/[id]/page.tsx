@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 import { studioSongs as defaultSongs, type Song } from '@/lib/mockData';
 
 type SongDetailProps = {
@@ -12,31 +12,22 @@ type SongDetailProps = {
 };
 
 export default function SongDetailPage({ params }: SongDetailProps) {
-  const [song, setSong] = useState<Song | undefined>(undefined);
   const [localAssets, setLocalAssets] = useState<Song[]>([]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('aimStudioSongs');
-    if (stored) {
-      setLocalAssets(JSON.parse(stored) as Song[]);
-    }
+    const hydrationTimer = window.setTimeout(() => {
+      const stored = window.localStorage.getItem('aimStudioSongs');
+      if (stored) {
+        setLocalAssets(JSON.parse(stored) as Song[]);
+      }
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
-  useEffect(() => {
-    const uploaded = localAssets.find((item) => item.id === params.id);
-    const mock = defaultSongs.find((item) => item.id === params.id);
-    setSong(uploaded || mock);
-  }, [localAssets, params.id]);
-
-  if (!song) {
-    return (
-      <SectionLayout title="Song not found" subtitle="We could not find this track in your library.">
-        <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-8 text-center text-[#B7C8DA]">
-          <p>Return to Studio Songs and choose another track.</p>
-        </div>
-      </SectionLayout>
-    );
-  }
+  const song = localAssets.find((item) => item.id === params.id)
+    || defaultSongs.find((item) => item.id === params.id)
+    || createPrototypeSong(params.id);
 
   return (
     <SectionLayout title={song.title} subtitle={`Deep track view for ${song.title}.`}>
@@ -105,9 +96,14 @@ export default function SongDetailPage({ params }: SongDetailProps) {
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
               {['Build release plan', 'Start campaign', 'Draft outreach', 'Move to release'].map((label) => (
-                <button key={label} className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">
-                  {label}
-                </button>
+                <PrototypeAction
+                  key={label}
+                  label={label}
+                  result={label.includes('Draft') ? 'Draft created' : 'Task created'}
+                  title={`${label} ready`}
+                  message={`Alex prepared a prototype ${label.toLowerCase()} for ${song.title}.`}
+                  className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+                />
               ))}
             </div>
           </div>
@@ -133,4 +129,20 @@ export default function SongDetailPage({ params }: SongDetailProps) {
       </div>
     </SectionLayout>
   );
+}
+
+function createPrototypeSong(id: string): Song {
+  return {
+    id,
+    title: decodeURIComponent(id).replace(/[-_]+/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+    artist: 'AIM Artist',
+    bpm: 112,
+    key: 'F#m',
+    genre: 'Synth Pop',
+    mood: 'Focused',
+    uploadDate: 'Prototype',
+    notes: 'Prototype track detail created so this route always has a useful review surface.',
+    collaborators: 'Self',
+    status: 'demo',
+  };
 }

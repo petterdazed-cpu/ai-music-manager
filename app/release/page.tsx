@@ -1,4 +1,5 @@
 import SectionLayout from '@/components/SectionLayout';
+import PrototypeAction from '@/components/PrototypeAction';
 
 const releases = [
   { title: 'Upcoming Single', status: 'Planning', date: 'Jun 21', progress: 55 },
@@ -77,9 +78,13 @@ export default function ReleasePage() {
                 <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Launch priority</p>
                 <p className="mt-4 text-lg font-semibold text-white">Finalize artwork, metadata and pre-save flow before outreach.</p>
                 <p className="mt-3 text-sm leading-6 text-[#B7C8DA]">This page will connect to your studio uploads, press assets, and campaign planning so every release becomes a coordinated launch.</p>
-                <button className="mt-6 rounded-full bg-[#0ea5ff] px-6 py-4 text-sm font-semibold text-black transition hover:bg-[#12b0ff]">
-                  Open launch workflow
-                </button>
+                <PrototypeAction
+                  label="Open launch workflow"
+                  result="Launch workflow opened"
+                  title="Release workflow draft created"
+                  message="Alex created a prototype launch workflow with artwork, metadata, pre-save, press and playlist tasks."
+                  className="mt-6 rounded-full bg-[#0ea5ff] px-6 py-4 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+                />
               </div>
             </div>
           </div>

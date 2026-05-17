@@ -37,6 +37,7 @@ export default function Home() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const streamQueueRef = useRef('');
   const streamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
     const hydrateStoredContent = () => {
@@ -267,7 +268,10 @@ export default function Home() {
           {/* Slim ticker-style Industry Feed */}
           <div className="mx-auto mb-2 mt-0 w-full max-w-[960px]">
             <div className="overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/12 bg-[#05131f]/88 px-3 py-2 shadow-[0_0_40px_rgba(14,165,233,0.08)]">
-              <div className="flex items-center text-sm text-[#D7E6FF]">
+              <div className="flex items-center gap-3 text-sm text-[#D7E6FF]">
+                <div className="flex-shrink-0 rounded-full border border-[#0ea5e9]/18 bg-[#0ea5e9]/8 px-2 py-0.5 text-[11px] uppercase tracking-[0.28em] text-[#B7D9FF]">
+                  LIVE
+                </div>
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <div className="flex gap-4 animate-marquee-left hover:animation-play-state-paused whitespace-nowrap text-sm text-[#E7F1FF]">
                     {feedItems.concat(feedItems).map((item, index) => {
@@ -328,12 +332,22 @@ export default function Home() {
               <div className="flex-shrink-0 border-t border-white/8 bg-[#050f19]/92 px-5 py-3">
                 <div className="mb-2 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
                   {suggestions.map((s) => (
-                    <button key={s} className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-2.5 py-1 text-[11px] font-medium tracking-[0.08em] text-[#D7E6FF] transition hover:border-[#0ea5e9]/18 hover:bg-[#0ea5e9]/10" onClick={() => setInputValue(s)}>{s}</button>
+                    <button
+                      key={s}
+                      className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-2.5 py-1 text-[11px] font-medium tracking-[0.08em] text-[#D7E6FF] transition hover:border-[#0ea5e9]/18 hover:bg-[#0ea5e9]/10"
+                      onClick={() => {
+                        setInputValue(s);
+                        inputRef.current?.focus();
+                      }}
+                    >
+                      {s}
+                    </button>
                   ))}
                 </div>
 
                 <div className="flex items-center gap-2.5">
                   <textarea
+                    ref={inputRef}
                     className="min-h-[54px] flex-1 resize-none rounded-[0.875rem] border border-white/12 bg-[#03101b]/96 px-4 py-2.5 text-sm leading-6 text-white outline-none placeholder:text-[#C6E1FF] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/12"
                     placeholder={placeholder}
                     value={inputValue}
