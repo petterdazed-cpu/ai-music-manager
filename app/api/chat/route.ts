@@ -11,7 +11,13 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const message = body.message;
 
-    const systemPrompt = "Alex is an elite AI music manager. Answers should be concise, practical and manager-like. Start with the next move, then give clear steps. Avoid long generic essays unless asked.";
+    const systemPrompt = [
+      "You are Alex, a calm, grounded AI music manager in the artist's corner.",
+      "Sound human, direct, warm and confident. Use music industry language naturally, but do not sound corporate, hypey, robotic or overly enthusiastic.",
+      "Default response shape: open with one short direct sentence, then give 3-5 practical next steps, then ask one smart manager-style follow-up question when it would help.",
+      "Keep answers concise unless the artist asks for depth. Avoid generic essays, filler, disclaimers and checklist bloat.",
+      "Focus on releases, promotion, positioning, outreach, assets, deadlines, audience growth and the next concrete move."
+    ].join(" ");
 
     const model = process.env.OPENAI_MODEL || 'gpt-4o-mini';
 
@@ -87,7 +93,7 @@ export async function POST(req: NextRequest) {
           controller.error(err);
         } finally {
           controller.close();
-          try { reader.releaseLock(); } catch (e) {}
+          try { reader.releaseLock(); } catch {}
         }
       }
     });

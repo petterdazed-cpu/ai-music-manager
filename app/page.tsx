@@ -36,7 +36,9 @@ export default function Home() {
   const [messages, setMessages] = useState<{ id: string; role: 'user' | 'alex' | 'error'; text: string }[]>([]);
   const [errorText, setErrorText] = useState<string | null>(null);
   const streamQueueRef = useRef('');
+  const revealQueueRef = useRef<string[]>([]);
   const streamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const revealCompleteRef = useRef<(() => void) | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
@@ -99,33 +101,75 @@ export default function Home() {
     };
   }, []);
 
-  const flushAssistantStream = (assistantId: string) => {
-    if (streamTimerRef.current) {
-      clearTimeout(streamTimerRef.current);
-      streamTimerRef.current = null;
-    }
-
-    if (!streamQueueRef.current) return;
-
-    const queuedText = streamQueueRef.current;
-    streamQueueRef.current = '';
-    setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + queuedText } : pm));
-  };
-
-  const appendAssistantDelta = (assistantId: string, delta: string) => {
-    streamQueueRef.current += delta;
-
+  const scheduleAssistantReveal = (assistantId: string) => {
     if (streamTimerRef.current) return;
 
     streamTimerRef.current = setTimeout(() => {
       streamTimerRef.current = null;
-      if (!streamQueueRef.current) return;
+      const nextChunk = revealQueueRef.current.shift();
+      if (!nextChunk) return;
 
-      const queuedText = streamQueueRef.current;
-      streamQueueRef.current = '';
-      setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + queuedText } : pm));
-    }, 70);
+      setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + nextChunk } : pm));
+
+      if (revealQueueRef.current.length || streamQueueRef.current) {
+        promoteBufferedWords();
+        scheduleAssistantReveal(assistantId);
+      } else if (revealCompleteRef.current) {
+        revealCompleteRef.current();
+        revealCompleteRef.current = null;
+      }
+    }, getRevealDelay());
   };
+
+  const promoteBufferedWords = () => {
+    if (!streamQueueRef.current) return;
+
+    const queuedText = streamQueueRef.current;
+    const lastBoundary = Math.max(
+      queuedText.lastIndexOf(' '),
+      queuedText.lastIndexOf('\n'),
+      queuedText.lastIndexOf('\t')
+    );
+    if (lastBoundary === -1) return;
+
+    const readyText = queuedText.slice(0, lastBoundary + 1);
+    streamQueueRef.current = queuedText.slice(lastBoundary + 1);
+
+    if (!readyText) return;
+
+    const tokens = readyText.match(/\S+\s*/g) || [];
+    for (let index = 0; index < tokens.length; index += 2) {
+      revealQueueRef.current.push(tokens.slice(index, index + 2).join(''));
+    }
+  };
+
+  const getRevealDelay = () => {
+    const nextChunk = revealQueueRef.current[0] || '';
+    if (nextChunk.length > 24) return 70;
+    if (nextChunk.length > 12) return 60;
+    return 45;
+  };
+
+  const appendAssistantDelta = (assistantId: string, delta: string) => {
+    streamQueueRef.current += delta;
+    promoteBufferedWords();
+    scheduleAssistantReveal(assistantId);
+  };
+
+  const finishAssistantStream = (assistantId: string) => new Promise<void>((resolve) => {
+    if (streamQueueRef.current) {
+      revealQueueRef.current.push(streamQueueRef.current);
+      streamQueueRef.current = '';
+    }
+
+    if (!revealQueueRef.current.length) {
+      resolve();
+      return;
+    }
+
+    revealCompleteRef.current = resolve;
+    scheduleAssistantReveal(assistantId);
+  });
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -139,6 +183,7 @@ export default function Home() {
     const assistantMsg = { id: assistantId, role: 'alex' as const, text: '' };
 
     streamQueueRef.current = '';
+    revealQueueRef.current = [];
     setMessages((m) => [...m, userMsg, assistantMsg]);
     setIsLoading(true);
     setStreamingMessageId(assistantId);
@@ -211,7 +256,7 @@ export default function Home() {
         }
       }
 
-      flushAssistantStream(assistantId);
+      await finishAssistantStream(assistantId);
       console.log('Chat response stream finished');
     } catch (err) {
       console.error('Failed to send message:', err);
@@ -219,7 +264,7 @@ export default function Home() {
       setErrorText(msg);
       setMessages((m) => m.map(pm => pm.role === 'alex' && pm.text === '' ? { ...pm, text: `Error: ${msg}` } : pm));
     } finally {
-      flushAssistantStream(assistantId);
+      await finishAssistantStream(assistantId);
       setIsLoading(false);
       setStreamingMessageId(null);
     }
