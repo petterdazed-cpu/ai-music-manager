@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, type KeyboardEvent } from 'react';
+import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
 import { industryFeed } from '@/lib/mockData';
 
 export default function Home() {
@@ -74,50 +74,103 @@ export default function Home() {
     else setLogoSize(520);
   }, []);
 
+  const historyRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // scroll to bottom when messages change
+    if (historyRef.current) {
+      historyRef.current.scrollTop = historyRef.current.scrollHeight;
+    }
+  }, [messages, isLoading]);
+
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    const messageToSend = inputValue.trim();
-    // show user message immediately
-    const userMsg = { id: `u-${Date.now()}`, role: 'user' as const, text: messageToSend };
-    setMessages((m) => [...m, userMsg]);
+    const userText = inputValue.trim();
+    setInputValue('');
     setErrorText(null);
 
+    const userMsg = { id: `u-${Date.now()}`, role: 'user' as const, text: userText };
+    const assistantId = `a-${Date.now()}`;
+    const assistantMsg = { id: assistantId, role: 'alex' as const, text: '' };
+
+    setMessages((m) => [...m, userMsg, assistantMsg]);
     setIsLoading(true);
 
     try {
-      console.log('Sending message to /api/chat', inputValue);
+      console.log('Sending message to /api/chat', userText);
 
-      const response = await fetch('/api/chat', {
+      const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: inputValue }),
+        body: JSON.stringify({ message: userText }),
       });
 
-      const data = await response.json();
-      console.log('Chat response', data);
-
-      if (!response.ok) {
-        const err = data?.error || 'Failed to get a response from Alex';
-        console.error('Chat error:', err);
-        setErrorText(err);
-        setMessages((m) => [...m, { id: `e-${Date.now()}`, role: 'error', text: err }] );
+      if (!res.ok || !res.body) {
+        const text = await res.text();
+        console.error('Chat error', text);
+        setErrorText('Failed to get a response from Alex');
+        setMessages((m) => m.map(msg => msg.id === assistantId ? { ...msg, text: 'Error: failed to get response.' } : msg));
         return;
       }
 
-      if (data?.reply) {
-        setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'alex', text: String(data.reply) }]);
-      } else {
-        setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'alex', text: 'No reply from Alex.' }]);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        // split on SSE events (double newline)
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() || '';
+
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line) continue;
+          // OpenAI streams with lines like: data: {json}\n\n
+          const matches = line.split('\n').map(l => l.replace(/^data:\s*/, ''));
+          for (const m of matches) {
+            if (m === '[DONE]') {
+              // stream finished
+              break;
+            }
+            try {
+              const parsed = JSON.parse(m);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                setMessages((prev) => prev.map(pm => pm.id === assistantId ? { ...pm, text: pm.text + delta } : pm));
+              }
+            } catch (e) {
+              // ignore non-json lines
+            }
+          }
+        }
       }
 
-      // clear input after sending
-      setInputValue('');
+      // final flush of any remaining buffer
+      if (buffer) {
+        const lines = buffer.split('\n').map(l => l.replace(/^data:\s*/, '')).filter(Boolean);
+        for (const l of lines) {
+          if (l === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(l);
+            const delta = parsed.choices?.[0]?.delta?.content;
+            if (delta) {
+              setMessages((prev) => prev.map(pm => pm.id === assistantId ? { ...pm, text: pm.text + delta } : pm));
+            }
+          } catch (e) {}
+        }
+      }
+
+      console.log('Chat response stream finished');
     } catch (err) {
       console.error('Failed to send message:', err);
       const msg = err instanceof Error ? err.message : 'Failed to send message. Please try again.';
       setErrorText(msg);
-      setMessages((m) => [...m, { id: `e-${Date.now()}`, role: 'error', text: msg }] );
+      setMessages((m) => m.map(pm => pm.role === 'alex' && pm.text === '' ? { ...pm, text: `Error: ${msg}` } : pm));
     } finally {
       setIsLoading(false);
     }
@@ -163,100 +216,20 @@ export default function Home() {
 
           </div>
 
-          <div className="mx-auto mt-12 mb-3 flex w-full max-w-[760px] items-start gap-4 rounded-[2rem] border border-[#0ea5e9]/15 bg-white/[0.04] px-5 py-6 shadow-[0_0_70px_rgba(10,132,255,0.12)] backdrop-blur-xl">
-            <button disabled className="flex h-16 w-16 items-center justify-center rounded-3xl bg-[#0ea5e9]/10 text-xl text-[#0ea5e9] shadow-[0_0_25px_rgba(14,165,233,0.2)] border border-[#0ea5e9]/20 opacity-50 cursor-not-allowed">
-              ↑
-            </button>
-
-            <textarea
-              className="flex-1 min-h-[88px] max-w-full resize-none rounded-3xl bg-transparent px-3 py-4 text-lg text-white outline-none placeholder:text-[#B7C8DA] focus:ring-0"
-              placeholder={placeholder}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={isLoading}
-            />
-
-            <button 
-              className="flex h-16 w-16 items-center justify-center rounded-full bg-[#0ea5e9] text-xl font-bold text-white shadow-[0_0_35px_rgba(14,165,233,0.55)] disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
-              onClick={handleSendMessage}
-              disabled={isLoading || !inputValue.trim()}
-            >
-              {isLoading ? '...' : '↑'}
-            </button>
-          </div>
-
-          {/* TODO: connect upload button to Music file storage / intent routing later. */}
-
-          {/* Messages (user + Alex replies + errors) */}
-          <div className="mx-auto mt-6 w-full max-w-[760px]">
-            {messages.map((m) => (
-              <div key={m.id} className={`mb-3 flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={
-                  m.role === 'user'
-                    ? 'rounded-2xl px-4 py-2 bg-[#0ea5e9] text-black text-sm max-w-[82%]'
-                    : m.role === 'alex'
-                    ? 'rounded-2xl px-4 py-2 bg-white/[0.02] border border-white/6 text-[#D7E6FF] text-sm max-w-[82%]'
-                    : 'rounded-2xl px-4 py-2 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-sm max-w-[82%]'
-                }>
-                  {m.text}
-                </div>
-              </div>
-            ))}
-            {errorText ? (
-              <div className="mt-2 text-center text-sm text-[#ffb3b3]">{errorText}</div>
-            ) : null}
-          </div>
-
-          <div className="mx-auto mt-10 flex flex-wrap justify-center gap-3 max-w-[860px]">
-            {suggestions.map((suggestion) => (
-              <button
-                key={suggestion}
-                className="rounded-full border border-[#0ea5e9]/20 bg-black/30 px-5 py-3 text-sm text-[#D7E6FF] transition hover:border-[#0ea5e9] hover:bg-[#0ea5e9]/10"
-                onClick={() => setInputValue(suggestion)}
-              >
-                {suggestion}
-              </button>
-            ))}
-          </div>
-
-          <div className="mx-auto mt-16 w-full max-w-[980px] rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_20px_80px_rgba(10,132,255,0.18)] backdrop-blur-xl">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <h3 className="text-xl font-semibold">Industry Feed</h3>
-                <span className="h-2 w-2 rounded-full bg-[#0ea5e9]" />
-                <span className="text-sm text-[#AED7FF]">LIVE</span>
-              </div>
-              <span className="text-[#0ea5ff] text-xl">&gt;</span>
-            </div>
-            <div className="space-y-4">
-              <div className="overflow-hidden rounded-[1.75rem] border border-white/5 bg-black/20 px-3 py-2">
+          {/* Slim ticker-style Industry Feed */}
+          <div className="mx-auto mt-6 mb-4 w-full max-w-[760px]">
+            <div className="overflow-hidden rounded-full border border-white/6 bg-black/20 px-3 py-2">
+              <div className="flex gap-3 items-center text-sm text-[#D7E6FF]">
+                <span className="text-[#0ea5e9] mr-2">LIVE</span>
                 <div className="flex gap-4 animate-marquee-left hover:animation-play-state-paused">
                   {feedItems.concat(feedItems).map((item, index) => {
                     const id = typeof item === 'string' ? `feed-${index}` : item.id;
                     const title = typeof item === 'string' ? item : item.title;
                     return (
                       <Link
-                        key={`row1-${index}`}
+                        key={`ticker-${index}`}
                         href={`/opportunities/${encodeURIComponent(id)}`}
-                        className="flex-shrink-0 rounded-full border border-white/10 bg-[#07101a]/90 px-4 py-2 shadow-[0_2px_12px_rgba(10,132,255,0.12)] text-sm text-[#D7E6FF] whitespace-nowrap transition hover:border-[#0ea5ff]/30 hover:text-white"
-                      >
-                        {title}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-              <div className="overflow-hidden rounded-[1.75rem] border border-white/5 bg-black/20 px-3 py-2">
-                <div className="flex gap-4 animate-marquee-right hover:animation-play-state-paused">
-                  {feedItems.concat(feedItems).map((item, index) => {
-                    const id = typeof item === 'string' ? `feed-${index}` : item.id;
-                    const title = typeof item === 'string' ? item : item.title;
-                    return (
-                      <Link
-                        key={`row2-${index}`}
-                        href={`/opportunities/${encodeURIComponent(id)}`}
-                        className="flex-shrink-0 rounded-full border border-white/10 bg-[#07101a]/90 px-4 py-2 shadow-[0_2px_12px_rgba(10,132,255,0.12)] text-sm text-[#D7E6FF] whitespace-nowrap transition hover:border-[#0ea5ff]/30 hover:text-white"
+                        className="flex-shrink-0 rounded-full px-3 py-1 text-xs text-[#D7E6FF] hover:text-white"
                       >
                         {title}
                       </Link>
@@ -265,27 +238,64 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <style dangerouslySetInnerHTML={{
-              __html: `
-                @keyframes marquee-left {
-                  0% { transform: translateX(0); }
-                  100% { transform: translateX(-50%); }
-                }
-                @keyframes marquee-right {
-                  0% { transform: translateX(-50%); }
-                  100% { transform: translateX(0); }
-                }
-                .animate-marquee-left {
-                  animation: marquee-left 35s linear infinite;
-                }
-                .animate-marquee-right {
-                  animation: marquee-right 35s linear infinite;
-                }
-                .animate-marquee-left:hover, .animate-marquee-right:hover {
-                  animation-play-state: paused;
-                }
-              `
-            }} />
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes marquee-left { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+              .animate-marquee-left { animation: marquee-left 30s linear infinite; }
+              .animate-marquee-left:hover { animation-play-state: paused; }
+            ` }} />
+          </div>
+
+          {/* Chat panel */}
+          <div className="mx-auto mt-4 w-full max-w-[760px]">
+            <div className="flex flex-col h-[560px] rounded-[1.5rem] border border-[#0ea5e9]/12 bg-white/[0.02] p-0 shadow-[0_20px_80px_rgba(10,132,255,0.12)] backdrop-blur-xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-white/6 text-left">
+                <div className="text-sm text-[#D7E6FF]">Alex</div>
+                <div className="mt-1 text-xs text-[#B7C8DA]">Morning. What are we moving forward today — release, promo, or strategy?</div>
+              </div>
+
+              <div ref={historyRef} className="flex-1 overflow-y-auto p-6 space-y-3">
+                {messages.map((m) => (
+                  <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={
+                      m.role === 'user'
+                        ? 'rounded-2xl px-4 py-2 bg-[#0ea5e9] text-black text-sm max-w-[80%]'
+                        : m.role === 'alex'
+                        ? 'rounded-2xl px-4 py-2 bg-white/[0.02] border border-white/6 text-[#D7E6FF] text-sm max-w-[80%]'
+                        : 'rounded-2xl px-4 py-2 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-sm max-w-[80%]'
+                    }>
+                      <div className="whitespace-pre-wrap">{m.text}{isLoading && m.role === 'alex' ? <span className="inline-block ml-1 w-1 h-4 bg-white animate-pulse" /> : null}</div>
+                    </div>
+                  </div>
+                ))}
+                {errorText ? <div className="text-sm text-[#ffb3b3]">{errorText}</div> : null}
+              </div>
+
+              <div className="px-4 py-3 border-t border-white/6 bg-black/10">
+                <div className="mb-3 flex flex-wrap gap-2">
+                  {suggestions.map((s) => (
+                    <button key={s} className="rounded-full bg-black/20 px-3 py-1 text-xs text-[#D7E6FF] hover:bg-[#0ea5e9]/8" onClick={() => setInputValue(s)}>{s}</button>
+                  ))}
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <textarea
+                    className="flex-1 max-h-24 min-h-[48px] resize-none rounded-xl bg-transparent px-3 py-2 text-sm text-white outline-none placeholder:text-[#B7C8DA]"
+                    placeholder={placeholder}
+                    value={inputValue}
+                    onChange={(e) => setInputValue(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    disabled={isLoading}
+                  />
+                  <button
+                    className="flex h-11 w-11 items-center justify-center rounded-full bg-[#0ea5e9] text-lg font-bold text-white shadow-[0_0_25px_rgba(14,165,233,0.45)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    onClick={handleSendMessage}
+                    disabled={isLoading || !inputValue.trim()}
+                  >
+                    {isLoading ? '...' : '↑'}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
 
