@@ -32,6 +32,8 @@ export default function Home() {
   const [logoSize, setLogoSize] = useState(520);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [messages, setMessages] = useState<{ id: string; role: 'user' | 'alex' | 'error'; text: string }[]>([]);
+  const [errorText, setErrorText] = useState<string | null>(null);
 
   useEffect(() => {
     const storedHeadline = localStorage.getItem('headline');
@@ -75,31 +77,47 @@ export default function Home() {
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
 
-    const message = inputValue.trim();
-    setInputValue('');
+    const messageToSend = inputValue.trim();
+    // show user message immediately
+    const userMsg = { id: `u-${Date.now()}`, role: 'user' as const, text: messageToSend };
+    setMessages((m) => [...m, userMsg]);
+    setErrorText(null);
+
     setIsLoading(true);
 
     try {
+      console.log('Sending message to /api/chat', inputValue);
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }),
+        body: JSON.stringify({ message: inputValue }),
       });
 
       const data = await response.json();
+      console.log('Chat response', data);
 
       if (!response.ok) {
-        console.error('Chat error:', data.error);
-        alert('Error: ' + (data.error || 'Failed to get a response from Alex'));
+        const err = data?.error || 'Failed to get a response from Alex';
+        console.error('Chat error:', err);
+        setErrorText(err);
+        setMessages((m) => [...m, { id: `e-${Date.now()}`, role: 'error', text: err }] );
         return;
       }
 
-      if (data.reply) {
-        console.log('Alex:', data.reply);
+      if (data?.reply) {
+        setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'alex', text: String(data.reply) }]);
+      } else {
+        setMessages((m) => [...m, { id: `a-${Date.now()}`, role: 'alex', text: 'No reply from Alex.' }]);
       }
-    } catch (error) {
-      console.error('Failed to send message:', error);
-      alert('Failed to send message. Please try again.');
+
+      // clear input after sending
+      setInputValue('');
+    } catch (err) {
+      console.error('Failed to send message:', err);
+      const msg = err instanceof Error ? err.message : 'Failed to send message. Please try again.';
+      setErrorText(msg);
+      setMessages((m) => [...m, { id: `e-${Date.now()}`, role: 'error', text: msg }] );
     } finally {
       setIsLoading(false);
     }
@@ -169,6 +187,26 @@ export default function Home() {
           </div>
 
           {/* TODO: connect upload button to Music file storage / intent routing later. */}
+
+          {/* Messages (user + Alex replies + errors) */}
+          <div className="mx-auto mt-6 w-full max-w-[760px]">
+            {messages.map((m) => (
+              <div key={m.id} className={`mb-3 flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={
+                  m.role === 'user'
+                    ? 'rounded-2xl px-4 py-2 bg-[#0ea5e9] text-black text-sm max-w-[82%]'
+                    : m.role === 'alex'
+                    ? 'rounded-2xl px-4 py-2 bg-white/[0.02] border border-white/6 text-[#D7E6FF] text-sm max-w-[82%]'
+                    : 'rounded-2xl px-4 py-2 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-sm max-w-[82%]'
+                }>
+                  {m.text}
+                </div>
+              </div>
+            ))}
+            {errorText ? (
+              <div className="mt-2 text-center text-sm text-[#ffb3b3]">{errorText}</div>
+            ) : null}
+          </div>
 
           <div className="mx-auto mt-10 flex flex-wrap justify-center gap-3 max-w-[860px]">
             {suggestions.map((suggestion) => (
