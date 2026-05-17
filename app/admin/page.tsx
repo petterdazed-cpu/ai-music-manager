@@ -10,15 +10,20 @@ export default function Admin() {
   const [feedItems, setFeedItems] = useState("New Miami venue looking for emerging live acts\nNordic pop playlists accepting independent submissions\nBerlin indie promoters looking for support acts\nStockholm festivals opening artist applications\nReminder: grant deadlines approaching\nSync opportunities rising for electronic producers\nNew songwriter camp announced in Copenhagen\nAlternative pop playlists gaining traction in Germany\nFestival bookers prioritizing strong live video clips\nMusic supervisors searching for cinematic alt-pop tracks\nNashville country showcases opening new artist slots\nIndependent labels seeking export-ready Nordic acts\nEuropean booking agents preparing spring tour routing\nLatin pop curators active in Miami this month\nTip: refresh your EPK before outreach\nNew sync briefs added for indie electronic producers\nShowcase opportunity announced in London\nStreaming editorial teams focusing on mood-based playlists\nPop publishing contacts added this week\nNew grants for independent creators now open\nArtist residency applications now open in Berlin\nTouring support opportunities expanding in Scandinavia");
   const [logoSize, setLogoSize] = useState(460);
   const [avatarVisible, setAvatarVisible] = useState(true);
+  const [statusText, setStatusText] = useState('');
 
   useEffect(() => {
-    setHeadline(localStorage.getItem('headline') || "What's the move?");
-    setSubheadline(localStorage.getItem('subheadline') || "Talk to Alex — your AI music manager.");
-    setPlaceholder(localStorage.getItem('placeholder') || "Ask Alex anything about your music career...");
-    setSuggestions(localStorage.getItem('suggestions') || "Help with promotion\nBuild release plan\nArtist strategy\nIndustry outreach");
-    setFeedItems(localStorage.getItem('feedItems') || "New Miami venue looking for emerging live acts\nNordic pop playlists accepting independent submissions\nStockholm festivals opening artist applications\nReminder: grant deadlines approaching\nSync opportunities rising for electronic producers\nTip: update your EPK before outreach");
-    setLogoSize(parseInt(localStorage.getItem('logoSize') || '240'));
-    setAvatarVisible(localStorage.getItem('avatarVisible') !== 'false');
+    const hydrationTimer = window.setTimeout(() => {
+      setHeadline(localStorage.getItem('headline') || "What's the move?");
+      setSubheadline(localStorage.getItem('subheadline') || "Talk to Alex — your AI music manager.");
+      setPlaceholder(localStorage.getItem('placeholder') || "Ask Alex anything about your music career...");
+      setSuggestions(localStorage.getItem('suggestions') || "Help with promotion\nBuild release plan\nArtist strategy\nIndustry outreach");
+      setFeedItems(localStorage.getItem('feedItems') || "New Miami venue looking for emerging live acts\nNordic pop playlists accepting independent submissions\nStockholm festivals opening artist applications\nReminder: grant deadlines approaching\nSync opportunities rising for electronic producers\nTip: update your EPK before outreach");
+      setLogoSize(parseInt(localStorage.getItem('logoSize') || '240'));
+      setAvatarVisible(localStorage.getItem('avatarVisible') !== 'false');
+    }, 0);
+
+    return () => window.clearTimeout(hydrationTimer);
   }, []);
 
   const save = () => {
@@ -29,7 +34,7 @@ export default function Admin() {
     localStorage.setItem('feedItems', feedItems);
     localStorage.setItem('logoSize', logoSize.toString());
     localStorage.setItem('avatarVisible', avatarVisible.toString());
-    alert('Saved!');
+    setStatusText('Saved. Homepage prototype content is updated for this browser.');
   };
 
   const reset = () => {
@@ -41,6 +46,7 @@ export default function Admin() {
     setFeedItems("New Miami venue looking for emerging live acts\nNordic pop playlists accepting independent submissions\nBerlin indie promoters looking for support acts\nStockholm festivals opening artist applications\nReminder: grant deadlines approaching\nSync opportunities rising for electronic producers\nNew songwriter camp announced in Copenhagen\nAlternative pop playlists gaining traction in Germany\nFestival bookers prioritizing strong live video clips\nMusic supervisors searching for cinematic alt-pop tracks\nNashville country showcases opening new artist slots\nIndependent labels seeking export-ready Nordic acts\nEuropean booking agents preparing spring tour routing\nLatin pop curators active in Miami this month\nTip: refresh your EPK before outreach\nNew sync briefs added for indie electronic producers\nShowcase opportunity announced in London\nStreaming editorial teams focusing on mood-based playlists\nPop publishing contacts added this week\nNew grants for independent creators now open\nArtist residency applications now open in Berlin\nTouring support opportunities expanding in Scandinavia");
     setLogoSize(460);
     setAvatarVisible(true);
+    setStatusText('Reset complete. AIM restored the default homepage prototype copy.');
   };
 
   return (
@@ -123,18 +129,25 @@ export default function Admin() {
 
           <div className="flex gap-4">
             <button
+              type="button"
               onClick={save}
               className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
             >
               Save Changes
             </button>
             <button
+              type="button"
               onClick={reset}
               className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
             >
               Reset to Defaults
             </button>
           </div>
+          {statusText ? (
+            <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+              {statusText}
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

@@ -1,105 +1,231 @@
 import SectionLayout from '@/components/SectionLayout';
 import PrototypeAction from '@/components/PrototypeAction';
 
-const releases = [
-  { title: 'Upcoming Single', status: 'Planning', date: 'Jun 21', progress: 55 },
-  { title: 'EP Concept', status: 'Concept', date: 'Aug 12', progress: 25 },
-  { title: 'Previous Release', status: 'Live', date: 'Feb 03', progress: 100 },
+type ReleaseLane = 'Upcoming Releases' | 'Active Campaigns' | 'Completed Releases';
+
+type Release = {
+  title: string;
+  lane: ReleaseLane;
+  type: string;
+  date: string;
+  campaignStatus: string;
+  playlistPitching: string;
+  promoAssets: string;
+  distributionStatus: string;
+  progress: number;
+  coverInitials: string;
+  coverClassName: string;
+  managerRead: string;
+};
+
+const lanes: ReleaseLane[] = ['Upcoming Releases', 'Active Campaigns', 'Completed Releases'];
+
+const releases: Release[] = [
+  {
+    title: 'Northern Lights',
+    lane: 'Upcoming Releases',
+    type: 'Single',
+    date: 'Jun 21, 2026',
+    campaignStatus: 'Pre-launch build',
+    playlistPitching: 'Shortlist ready: 18 targets',
+    promoAssets: 'Cover approved, clips pending',
+    distributionStatus: 'Draft saved, metadata review open',
+    progress: 64,
+    coverInitials: 'NL',
+    coverClassName: 'from-[#0ea5ff] via-[#7dd3fc] to-[#f9a8d4]',
+    managerRead: 'Best next move: lock the hook clip and send playlist pitches 14 days before release.',
+  },
+  {
+    title: 'Midnight Drive',
+    lane: 'Active Campaigns',
+    type: 'Single',
+    date: 'May 29, 2026',
+    campaignStatus: 'Campaign live',
+    playlistPitching: '7 sent, 3 follow-ups due',
+    promoAssets: 'Canvas, teaser and press image ready',
+    distributionStatus: 'Delivered to stores',
+    progress: 82,
+    coverInitials: 'MD',
+    coverClassName: 'from-[#111827] via-[#6366f1] to-[#22c55e]',
+    managerRead: 'Keep the campaign moving: follow up with curators and post the second performance clip.',
+  },
+  {
+    title: 'Afterglow',
+    lane: 'Completed Releases',
+    type: 'Single',
+    date: 'Feb 03, 2026',
+    campaignStatus: 'Wrap report complete',
+    playlistPitching: '12 pitches, 4 adds',
+    promoAssets: 'Archive complete',
+    distributionStatus: 'Live worldwide',
+    progress: 100,
+    coverInitials: 'AG',
+    coverClassName: 'from-[#f97316] via-[#facc15] to-[#14b8a6]',
+    managerRead: 'Useful signal: saves outperformed skips. Reuse the late-night angle for the next release.',
+  },
+  {
+    title: 'Velvet Static EP',
+    lane: 'Upcoming Releases',
+    type: 'EP',
+    date: 'Aug 16, 2026',
+    campaignStatus: 'Strategy draft',
+    playlistPitching: 'Positioning not final',
+    promoAssets: 'Artwork direction chosen',
+    distributionStatus: 'Not submitted',
+    progress: 38,
+    coverInitials: 'VS',
+    coverClassName: 'from-[#581c87] via-[#db2777] to-[#f8fafc]',
+    managerRead: 'Do not open distribution yet. Sequence the singles first, then set the EP date.',
+  },
 ];
 
-const checklist = [
-  'Final audio export',
-  'Cover artwork',
-  'Metadata review',
-  'Store territories',
-  'ISRC / UPC',
-  'Pre-save landing page',
-  'Press pitch',
-  'Playlist outreach',
+const commandMetrics = [
+  { label: 'Release pipeline', value: '4', detail: '2 upcoming, 1 live, 1 completed' },
+  { label: 'Playlist pitches', value: '37', detail: 'Across active and planned campaigns' },
+  { label: 'Assets ready', value: '78%', detail: 'Cover, canvas, clips and press materials' },
+  { label: 'Next deadline', value: 'Jun 7', detail: 'Northern Lights pitch window opens' },
 ];
+
+const actionClassName = 'rounded-full bg-[#0ea5ff] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]';
+const secondaryActionClassName = 'rounded-full bg-white/5 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10';
 
 export default function ReleasePage() {
   return (
     <SectionLayout
       title="Releases"
-      subtitle="Build your release roadmap, keep every asset ready, and close the launch loop."
+      subtitle="Plan launches, track campaigns, keep distribution clean and make sure every release has a real next move."
     >
-      <div className="space-y-10">
-        <div className="grid gap-6 lg:grid-cols-3">
-          {releases.map((release) => (
-            <div key={release.title} className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
-              <div className="flex items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-xl font-semibold">{release.title}</h3>
-                  <p className="mt-2 text-sm text-[#B7C8DA]">Status: {release.status}</p>
-                </div>
-                <span className="rounded-full bg-[#0ea5e9]/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-[#AED7FF]">{release.status}</span>
-              </div>
-              <div className="mt-5 h-36 rounded-[1.5rem] bg-white/5 border border-white/10" />
-              <p className="mt-4 text-sm text-[#B7C8DA]">
-                Release date: <span className="font-semibold text-white">{release.date}</span>
+      <div className="space-y-8">
+        <section className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#030914]/95 p-6 shadow-[0_24px_90px_rgba(10,132,255,0.18)] backdrop-blur-xl">
+          <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr] xl:items-end">
+            <div>
+              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Release command center</p>
+              <h2 className="mt-3 text-4xl font-semibold text-white">Aurora Lane launch pipeline</h2>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B7C8DA]">
+                A working view of what is coming, what is live and what has already shipped, with the campaign details artists actually need.
               </p>
-              <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
-                <div
-                  className="h-full rounded-full bg-gradient-to-r from-[#0ea5ff] via-[#6fb8ff] to-[#7ad6ff]"
-                  style={{ width: `${release.progress}%` }}
-                />
-              </div>
             </div>
-          ))}
-        </div>
-
-        <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-8 shadow-[0_20px_80px_rgba(10,132,255,0.18)] backdrop-blur-xl">
-            <div className="flex flex-col gap-6">
-              <div className="flex items-center gap-4">
-                <span className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-[#0ea5e9]/10 text-2xl text-[#0ea5ff]">↗</span>
-                <div>
-                  <h3 className="text-3xl font-semibold">Release command center</h3>
-                  <p className="mt-2 text-sm text-[#B7C8DA]">Set the launch date, route assets, and lock in your promotional plan from one place.</p>
-                </div>
-              </div>
-
-              <div className="grid gap-5 sm:grid-cols-2">
-                {[
-                  { label: 'Active campaign', value: '2 releases' },
-                  { label: 'Press assets ready', value: '87%' },
-                  { label: 'Playlist targets', value: '12' },
-                  { label: 'Release tasks complete', value: '6/8' },
-                ].map((metric) => (
-                  <div key={metric.label} className="rounded-[1.75rem] bg-[#061229]/95 p-5 text-sm text-[#D7E6FF]">
-                    <p className="uppercase tracking-[0.28em] text-[#8ec6ff]">{metric.label}</p>
-                    <p className="mt-3 text-2xl font-semibold text-white">{metric.value}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6">
-                <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Launch priority</p>
-                <p className="mt-4 text-lg font-semibold text-white">Finalize artwork, metadata and pre-save flow before outreach.</p>
-                <p className="mt-3 text-sm leading-6 text-[#B7C8DA]">This page will connect to your studio uploads, press assets, and campaign planning so every release becomes a coordinated launch.</p>
-                <PrototypeAction
-                  label="Open launch workflow"
-                  result="Launch workflow opened"
-                  title="Release workflow draft created"
-                  message="Alex created a prototype launch workflow with artwork, metadata, pre-save, press and playlist tasks."
-                  className="mt-6 rounded-full bg-[#0ea5ff] px-6 py-4 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-6">
-            <h4 className="text-lg font-semibold">Release checklist</h4>
-            <div className="mt-5 space-y-3">
-              {checklist.map((item) => (
-                <div key={item} className="flex items-center gap-3 text-sm text-[#B7C8DA]">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#0ea5ff]/20 text-[#0ea5ff]">✓</span>
-                  <span>{item}</span>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {commandMetrics.map((metric) => (
+                <div key={metric.label} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4">
+                  <p className="text-xs uppercase tracking-[0.26em] text-[#8ec6ff]">{metric.label}</p>
+                  <p className="mt-2 text-2xl font-semibold text-white">{metric.value}</p>
+                  <p className="mt-2 text-xs leading-5 text-[#B7C8DA]">{metric.detail}</p>
                 </div>
               ))}
             </div>
           </div>
+        </section>
+
+        <div className="space-y-8">
+          {lanes.map((lane) => {
+            const laneReleases = releases.filter((release) => release.lane === lane);
+
+            return (
+              <section key={lane} className="space-y-4">
+                <div className="flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">{lane}</p>
+                    <h3 className="mt-2 text-2xl font-semibold text-white">{laneReleases.length} release{laneReleases.length === 1 ? '' : 's'}</h3>
+                  </div>
+                  <PrototypeAction
+                    label={lane === 'Completed Releases' ? 'Create wrap report' : 'Build lane plan'}
+                    result={lane === 'Completed Releases' ? 'Report drafted' : 'Plan created'}
+                    title={`${lane} workflow ready`}
+                    message={`Alex created a prototype ${lane.toLowerCase()} workflow with dates, owners, assets and follow-up actions.`}
+                    className={secondaryActionClassName}
+                  />
+                </div>
+
+                <div className="grid gap-5 xl:grid-cols-2">
+                  {laneReleases.map((release) => (
+                    <article key={release.title} className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-5 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
+                      <div className="grid gap-5 md:grid-cols-[168px_1fr]">
+                        <div className={`flex aspect-square items-end justify-between rounded-[1.75rem] bg-gradient-to-br ${release.coverClassName} p-4 shadow-[inset_0_0_70px_rgba(0,0,0,0.28)]`}>
+                          <span className="text-4xl font-semibold text-white">{release.coverInitials}</span>
+                          <span className="rounded-full bg-black/35 px-3 py-1 text-xs uppercase tracking-[0.2em] text-white">{release.type}</span>
+                        </div>
+
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs uppercase tracking-[0.26em] text-[#8ec6ff]">{release.date}</p>
+                              <h4 className="mt-2 text-2xl font-semibold text-white">{release.title}</h4>
+                            </div>
+                            <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-[#AED7FF]">
+                              {release.campaignStatus}
+                            </span>
+                          </div>
+
+                          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                            {[
+                              ['Playlist pitching', release.playlistPitching],
+                              ['Promo assets', release.promoAssets],
+                              ['Distribution', release.distributionStatus],
+                              ['Campaign status', release.campaignStatus],
+                            ].map(([label, value]) => (
+                              <div key={label} className="rounded-[1.25rem] border border-white/10 bg-[#061229]/95 p-4">
+                                <p className="text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">{label}</p>
+                                <p className="mt-2 text-sm leading-5 text-[#D7E6FF]">{value}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-5">
+                            <div className="flex items-center justify-between text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">
+                              <span>Timeline progress</span>
+                              <span>{release.progress}%</span>
+                            </div>
+                            <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/10">
+                              <div
+                                className="h-full rounded-full bg-gradient-to-r from-[#0ea5ff] via-[#7dd3fc] to-[#22c55e]"
+                                style={{ width: `${release.progress}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-4 text-sm leading-6 text-[#D7E6FF]">
+                        <span className="font-semibold text-white">Alex:</span> {release.managerRead}
+                      </div>
+
+                      <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <PrototypeAction
+                          label="Draft pitch"
+                          result="Pitch drafted"
+                          title={`${release.title} pitch ready`}
+                          message={`Alex drafted a concise playlist and press pitch for ${release.title}, including angle, genre fit and follow-up timing.`}
+                          className={actionClassName}
+                        />
+                        <PrototypeAction
+                          label="Open campaign"
+                          result="Campaign opened"
+                          title={`${release.title} campaign view`}
+                          message={`Prototype campaign opened with timeline, asset checklist, pitch queue and next manager action for ${release.title}.`}
+                          className={secondaryActionClassName}
+                        />
+                        <PrototypeAction
+                          label="Build release plan"
+                          result="Plan created"
+                          title={`${release.title} release plan`}
+                          message={`Alex built a prototype release plan with milestones for distribution, pre-save, content, press and playlist outreach.`}
+                          className={secondaryActionClassName}
+                        />
+                        <PrototypeAction
+                          label="Distribution"
+                          result="Distribution workflow opened"
+                          title={`${release.title} distribution checklist`}
+                          message={`AIM prepared a mock distribution workflow: metadata check, territories, store date, ISRC/UPC and final audio confirmation.`}
+                          className={secondaryActionClassName}
+                        />
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            );
+          })}
         </div>
       </div>
     </SectionLayout>

@@ -5,6 +5,10 @@ import { useState, useEffect, useRef, type KeyboardEvent } from 'react';
 import { industryFeed } from '@/lib/mockData';
 
 type FeedItem = (typeof industryFeed)[number];
+type AssistantActivity = { id: string; phase: 'thinking' | 'typing' } | null;
+type RevealChunk = { text: string; delayAfter: number };
+
+const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 
 export default function Home() {
   const defaultNavItems = [
@@ -32,13 +36,13 @@ export default function Home() {
   const [logoSize, setLogoSize] = useState(520);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [streamingMessageId, setStreamingMessageId] = useState<string | null>(null);
+  const [assistantActivity, setAssistantActivity] = useState<AssistantActivity>(null);
   const [messages, setMessages] = useState<{ id: string; role: 'user' | 'alex' | 'error'; text: string }[]>([]);
   const [errorText, setErrorText] = useState<string | null>(null);
   const streamQueueRef = useRef('');
-  const revealQueueRef = useRef<string[]>([]);
-  const streamTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const revealCompleteRef = useRef<(() => void) | null>(null);
+  const revealQueueRef = useRef<RevealChunk[]>([]);
+  const streamDoneRef = useRef(false);
+  const streamSessionRef = useRef(0);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   useEffect(() => {
@@ -95,42 +99,18 @@ export default function Home() {
     }
   }, [messages, isLoading]);
 
-  useEffect(() => {
-    return () => {
-      if (streamTimerRef.current) clearTimeout(streamTimerRef.current);
-    };
-  }, []);
-
-  const scheduleAssistantReveal = (assistantId: string) => {
-    if (streamTimerRef.current) return;
-
-    streamTimerRef.current = setTimeout(() => {
-      streamTimerRef.current = null;
-      const nextChunk = revealQueueRef.current.shift();
-      if (!nextChunk) return;
-
-      setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + nextChunk } : pm));
-
-      if (revealQueueRef.current.length || streamQueueRef.current) {
-        promoteBufferedWords();
-        scheduleAssistantReveal(assistantId);
-      } else if (revealCompleteRef.current) {
-        revealCompleteRef.current();
-        revealCompleteRef.current = null;
-      }
-    }, getRevealDelay());
-  };
-
-  const promoteBufferedWords = () => {
+  const promoteBufferedText = (force = false) => {
     if (!streamQueueRef.current) return;
 
     const queuedText = streamQueueRef.current;
-    const lastBoundary = Math.max(
-      queuedText.lastIndexOf(' '),
-      queuedText.lastIndexOf('\n'),
-      queuedText.lastIndexOf('\t')
-    );
-    if (lastBoundary === -1) return;
+    const lastBoundary = force
+      ? queuedText.length - 1
+      : Math.max(
+        queuedText.lastIndexOf(' '),
+        queuedText.lastIndexOf('\n'),
+        queuedText.lastIndexOf('\t')
+      );
+    if (lastBoundary < 0) return;
 
     const readyText = queuedText.slice(0, lastBoundary + 1);
     streamQueueRef.current = queuedText.slice(lastBoundary + 1);
@@ -138,38 +118,68 @@ export default function Home() {
     if (!readyText) return;
 
     const tokens = readyText.match(/\S+\s*/g) || [];
-    for (let index = 0; index < tokens.length; index += 2) {
-      revealQueueRef.current.push(tokens.slice(index, index + 2).join(''));
+    let chunk = '';
+    let wordCount = 0;
+
+    for (const token of tokens) {
+      chunk += token;
+      wordCount += 1;
+
+      const lineBreak = token.includes('\n');
+
+      if (lineBreak || wordCount >= 3) {
+        revealQueueRef.current.push({
+          text: chunk,
+          delayAfter: getChunkDelay(chunk),
+        });
+        chunk = '';
+        wordCount = 0;
+      }
+    }
+
+    if (chunk) {
+      revealQueueRef.current.push({
+        text: chunk,
+        delayAfter: getChunkDelay(chunk),
+      });
     }
   };
 
-  const getRevealDelay = () => {
-    const nextChunk = revealQueueRef.current[0] || '';
-    if (nextChunk.length > 24) return 70;
-    if (nextChunk.length > 12) return 60;
-    return 45;
+  const getChunkDelay = (chunk: string) => {
+    if (!chunk.trim()) return 70;
+    if (chunk.includes('\n\n')) return 300;
+    if (chunk.includes('\n')) return 180;
+    if (/^\s*[-•*]\s/.test(chunk)) return 160;
+    if (chunk.length > 36) return 135;
+    if (chunk.length > 18) return 115;
+    return 95;
   };
 
-  const appendAssistantDelta = (assistantId: string, delta: string) => {
+  const appendAssistantDelta = (delta: string) => {
     streamQueueRef.current += delta;
-    promoteBufferedWords();
-    scheduleAssistantReveal(assistantId);
   };
 
-  const finishAssistantStream = (assistantId: string) => new Promise<void>((resolve) => {
-    if (streamQueueRef.current) {
-      revealQueueRef.current.push(streamQueueRef.current);
-      streamQueueRef.current = '';
-    }
+  const runAssistantReveal = async (assistantId: string, sessionId: number) => {
+    setAssistantActivity({ id: assistantId, phase: 'thinking' });
+    await sleep(500);
 
-    if (!revealQueueRef.current.length) {
-      resolve();
-      return;
-    }
+    if (streamSessionRef.current !== sessionId) return;
+    setAssistantActivity({ id: assistantId, phase: 'typing' });
 
-    revealCompleteRef.current = resolve;
-    scheduleAssistantReveal(assistantId);
-  });
+    while (streamSessionRef.current === sessionId) {
+      promoteBufferedText(streamDoneRef.current);
+
+      const nextChunk = revealQueueRef.current.shift();
+      if (nextChunk) {
+        setMessages((prev) => prev.map((pm) => pm.id === assistantId ? { ...pm, text: pm.text + nextChunk.text } : pm));
+        await sleep(nextChunk.delayAfter);
+        continue;
+      }
+
+      if (streamDoneRef.current) break;
+      await sleep(25);
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -184,9 +194,12 @@ export default function Home() {
 
     streamQueueRef.current = '';
     revealQueueRef.current = [];
+    streamDoneRef.current = false;
+    const sessionId = streamSessionRef.current + 1;
+    streamSessionRef.current = sessionId;
     setMessages((m) => [...m, userMsg, assistantMsg]);
     setIsLoading(true);
-    setStreamingMessageId(assistantId);
+    const revealPromise = runAssistantReveal(assistantId, sessionId);
 
     try {
       console.log('Sending message to /api/chat', userText);
@@ -202,6 +215,8 @@ export default function Home() {
         console.error('Chat error', text);
         setErrorText('Failed to get a response from Alex');
         setMessages((m) => m.map(msg => msg.id === assistantId ? { ...msg, text: 'Error: failed to get response.' } : msg));
+        streamDoneRef.current = true;
+        await revealPromise;
         return;
       }
 
@@ -232,7 +247,7 @@ export default function Home() {
               const parsed = JSON.parse(m);
               const delta = parsed.choices?.[0]?.delta?.content;
               if (delta) {
-                appendAssistantDelta(assistantId, delta);
+                appendAssistantDelta(delta);
               }
             } catch {
               // ignore non-json lines
@@ -250,23 +265,25 @@ export default function Home() {
             const parsed = JSON.parse(l);
             const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
-              appendAssistantDelta(assistantId, delta);
+              appendAssistantDelta(delta);
             }
           } catch {}
         }
       }
 
-      await finishAssistantStream(assistantId);
+      streamDoneRef.current = true;
+      await revealPromise;
       console.log('Chat response stream finished');
     } catch (err) {
       console.error('Failed to send message:', err);
       const msg = err instanceof Error ? err.message : 'Failed to send message. Please try again.';
       setErrorText(msg);
       setMessages((m) => m.map(pm => pm.role === 'alex' && pm.text === '' ? { ...pm, text: `Error: ${msg}` } : pm));
+      streamDoneRef.current = true;
+      await revealPromise;
     } finally {
-      await finishAssistantStream(assistantId);
       setIsLoading(false);
-      setStreamingMessageId(null);
+      setAssistantActivity(null);
     }
   };
 
@@ -364,9 +381,29 @@ export default function Home() {
                         : 'max-w-[86%] rounded-[1.15rem] border border-[#ff4d4f]/20 bg-[#ff4d4f]/10 px-4 py-3 text-left text-sm leading-7 text-[#ffb3b3]'
                     }>
                       <div className="whitespace-pre-wrap break-words">
-                        {m.text}
-                        {isLoading && m.id === streamingMessageId ? (
-                          <span className="ml-2 inline-block h-2 w-2 rounded-full bg-[#BFE5FF] align-middle opacity-80 animate-pulse" />
+                        {assistantActivity?.id === m.id && assistantActivity.phase === 'thinking' && !m.text ? (
+                          <span className="inline-flex items-center gap-2 text-[#B7D9FF]">
+                            <span>Alex is thinking</span>
+                            <span className="inline-flex items-center gap-1">
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF]" />
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF] [animation-delay:140ms]" />
+                              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF] [animation-delay:280ms]" />
+                            </span>
+                          </span>
+                        ) : (
+                          <>
+                            {m.text}
+                            {assistantActivity?.id === m.id && assistantActivity.phase === 'typing' && m.text ? (
+                              <span className="ml-1.5 inline-block h-4 w-0.5 animate-pulse rounded-full bg-[#BFE5FF] align-[-2px] opacity-80" />
+                            ) : null}
+                          </>
+                        )}
+                        {assistantActivity?.id === m.id && assistantActivity.phase === 'typing' && !m.text ? (
+                          <span className="inline-flex items-center gap-1.5 text-[#B7D9FF]">
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF]" />
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF] [animation-delay:140ms]" />
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#BFE5FF] [animation-delay:280ms]" />
+                          </span>
                         ) : null}
                       </div>
                     </div>

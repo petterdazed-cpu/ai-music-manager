@@ -59,7 +59,7 @@ export function CreditsCard() {
           </div>
         ))}
       </div>
-      <p className="mt-5 text-xs text-[#B7C8DA]">TODO: connect credits to streaks, rewards, tasks and release milestones.</p>
+      <p className="mt-5 text-xs text-[#B7C8DA]">Credits currently preview how streaks, release milestones and completed tasks will reward momentum.</p>
     </div>
   );
 }
@@ -111,7 +111,7 @@ export function ProgressCard() {
           </div>
         ))}
       </div>
-      <p className="mt-5 text-xs text-[#B7C8DA]">TODO: sync goals to calendar reminders, achievements and release milestones.</p>
+      <p className="mt-5 text-xs text-[#B7C8DA]">Alex is previewing how these goals will sync into reminders, achievements and release milestones.</p>
     </div>
   );
 }
@@ -139,7 +139,7 @@ export function RecentActivityCard() {
           </div>
         ))}
       </div>
-      <p className="mt-5 text-xs text-[#B7C8DA]">TODO: add activity links to release workflows, calendar sync and email outreach status.</p>
+      <p className="mt-5 text-xs text-[#B7C8DA]">Recent activity previews the release, calendar and outreach events Alex will keep organized for you.</p>
     </div>
   );
 }
@@ -175,9 +175,13 @@ export function ContactCRMCard() {
           <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Contact CRM</p>
           <p className="mt-3 text-xl font-semibold text-white">Track outreach status</p>
         </div>
-        <Link href="/career" className="rounded-full bg-[#0ea5ff]/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#AED7FF] transition hover:bg-[#0ea5ff]/15">
-          View all
-        </Link>
+        <PrototypeAction
+          label="View all"
+          result="CRM opened"
+          title="Contact CRM prototype opened"
+          message="Alex prepared a full outreach board with venue, playlist, press and collaborator follow-up lanes."
+          className="rounded-full bg-[#0ea5ff]/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#AED7FF] transition hover:bg-[#0ea5ff]/15"
+        />
       </div>
       <div className="mt-6 space-y-4">
         {contacts.slice(0, 3).map((contact) => (

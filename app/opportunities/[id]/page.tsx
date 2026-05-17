@@ -60,10 +60,11 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
             <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Contact</p>
             <div className="mt-5 space-y-3 text-sm text-[#D7E6FF]">
               <p><span className="font-semibold text-white">Email:</span> {opportunity.email}</p>
-              <p><span className="font-semibold text-white">Website:</span> <a href={opportunity.website} target="_blank" rel="noreferrer" className="text-[#1E90FF] hover:text-white">{opportunity.website}</a></p>
+              <p><span className="font-semibold text-white">Source brief:</span> {opportunity.website}</p>
               <p><span className="font-semibold text-white">Submission deadline:</span> {opportunity.deadline}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
+              <PrototypeAction label="Open source brief" result="Brief opened" title="Source brief preview" message={`Alex opened a prototype source brief for ${opportunity.source} with contact notes, submission angle and asset checklist.`} className="rounded-full bg-[#0ea5ff]/10 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15" />
               <PrototypeAction label="Draft submission email" result="Draft created" title="Submission email drafted" message={`Alex drafted outreach for ${opportunity.source} and queued it with this opportunity's deadline.`} />
               <PrototypeAction label="Build press kit" result="Press kit started" title="Press kit draft created" message="A prototype press kit checklist is ready with bio, artwork, link, and live proof placeholders." className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10" />
               <PrototypeAction label="Save for later" result="Saved" title="Opportunity saved" message="This opportunity was saved to your AIM follow-up queue." className="rounded-full bg-[#1a1f2d] px-5 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10" />
