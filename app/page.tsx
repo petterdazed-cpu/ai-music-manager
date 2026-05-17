@@ -269,7 +269,7 @@ export default function Home() {
                         ? 'rounded-[1.25rem] px-4 py-2.5 bg-white/[0.03] border border-white/8 text-[#D7E6FF] text-sm leading-6 max-w-[80%] shadow-[0_6px_20px_rgba(10,132,255,0.06)]'
                         : 'rounded-[1.25rem] px-4 py-2.5 bg-[#ff4d4f]/10 border border-[#ff4d4f]/20 text-[#ffb3b3] text-sm leading-6 max-w-[80%]'
                     }>
-                      <div className="whitespace-pre-wrap break-words">{m.text}{isLoading && m.role === 'alex' ? <span className="inline-block ml-2 h-4 w-1 rounded-full bg-white animate-pulse" /> : null}</div>
+                      <div className="whitespace-pre-wrap break-words text-left">{m.text}{isLoading && m.role === 'alex' ? <span className="inline-block ml-2 h-4 w-1 rounded-full bg-white animate-pulse" /> : null}</div>
                     </div>
                   </div>
                 ))}
