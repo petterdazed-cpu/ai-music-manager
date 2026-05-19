@@ -20,11 +20,21 @@ export type AlexEmotionalSignal = {
   labels: string[];
 };
 
+export type AlexUserIntent = 'emotional' | 'tactical' | 'strategic' | 'operational' | 'creative';
+
 const emotionalPatterns = [
   { label: 'overwhelm', pattern: /\b(overwhelmed|stressed|anxious|panic|too much|burned out|burnt out|exhausted)\b/i },
   { label: 'discouragement', pattern: /\b(stuck|lost|hopeless|frustrated|discouraged|nothing is working)\b/i },
   { label: 'self-doubt', pattern: /\b(not good enough|doubt|insecure|scared|afraid|embarrassed)\b/i },
   { label: 'pressure', pattern: /\b(deadline|pressure|behind|late|missed|we said|urgent)\b/i },
+];
+
+const intentPatterns: Array<{ intent: AlexUserIntent; pattern: RegExp }> = [
+  { intent: 'emotional', pattern: /\b(overwhelmed|stressed|anxious|panic|burned out|stuck|lost|scared|afraid|heavy|frustrated)\b/i },
+  { intent: 'operational', pattern: /\b(upload|attached|save|add this|create|draft|send|organize|put this|route|file|asset|email)\b/i },
+  { intent: 'tactical', pattern: /\b(what should i do|next step|next move|today|this week|plan|checklist|tasks|pitch|outreach|book|finish)\b/i },
+  { intent: 'strategic', pattern: /\b(strategy|positioning|brand|career|long term|long-term|release window|rollout|audience growth|direction|bigger picture)\b/i },
+  { intent: 'creative', pattern: /\b(song|demo|lyrics|sound|genre|hook|chorus|verse|creative|artwork|visual|production)\b/i },
 ];
 
 export function detectEmotionalSignals(message: unknown): AlexEmotionalSignal {
@@ -35,6 +45,13 @@ export function detectEmotionalSignals(message: unknown): AlexEmotionalSignal {
     .map(({ label }) => label);
 
   return { detected: labels.length > 0, labels };
+}
+
+export function detectUserIntent(message: unknown): AlexUserIntent {
+  if (typeof message !== 'string') return 'tactical';
+
+  const match = intentPatterns.find(({ pattern }) => pattern.test(message));
+  return match?.intent || 'tactical';
 }
 
 function normalizeScale(value: unknown, fallback: number) {
@@ -59,6 +76,8 @@ export function normalizeManagerSettings(settings: AlexManagerSettings = {}): No
 export const alexBehaviorRules = [
   'Emotion-first rule: if the artist sounds overwhelmed, anxious, discouraged or under pressure, acknowledge the emotional reality first. Do not jump straight into tactical advice.',
   'After emotional acknowledgement, move into one grounded next step before listing tactics.',
+  'Opening variation rule: do not repeat the same opener across answers. Do not default to “Let’s zoom out”. Use zoom-out language only for genuinely strategic questions.',
+  'Choose the opening by intent: emotional means empathy first; tactical means direct next move; strategic means broader framing; operational means action confirmation; creative means a reflective question or creative read.',
   'Default response shape: short human manager reaction, then 3-5 practical next steps, then one smart follow-up question when useful.',
   'Keep answers tight unless the artist asks for depth.',
   'Be honest when the plan is thin, the release is not ready, the positioning is unclear, the pitch angle is weak, the assets are missing, or the artist is avoiding the obvious next move.',
@@ -69,6 +88,7 @@ export const alexBehaviorRules = [
 export const alexAntiPatterns = [
   'As an AI',
   'Certainly',
+  'Let’s zoom out and look at the bigger picture first',
   'Here are some recommendations',
   'I recommend that you',
   'Here is a detailed strategy',

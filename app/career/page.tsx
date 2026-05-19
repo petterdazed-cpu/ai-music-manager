@@ -21,8 +21,8 @@ export default function CareerPage() {
     >
       <div className="grid gap-6 xl:grid-cols-[1.4fr_1.1fr_1fr]">
         <div className="space-y-6">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-white/[0.04] p-8 shadow-[0_20px_90px_rgba(10,132,255,0.14)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Good evening, Aurora</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-white/[0.05] p-8 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Good evening, Aurora</p>
             <h2 className="mt-4 text-5xl font-semibold leading-tight text-white">Build your career.</h2>
             <p className="mt-4 max-w-xl text-lg text-[#B7C8DA]">Your music. Your momentum. Your manager.</p>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -33,7 +33,7 @@ export default function CareerPage() {
                   result={action === 'Write Email' ? 'Draft created' : action === 'Set Goal' ? 'Goal created' : 'Task created'}
                   title={`${action} prototype ready`}
                   message={`Alex prepared a ${action.toLowerCase()} next step for your career dashboard.`}
-                  className="rounded-full bg-[#1E90FF]/12 px-5 py-3 text-sm font-semibold text-[#E9F4FF] transition hover:bg-[#1E90FF]/20"
+                  className="rounded-full border border-violet-300/15 bg-violet-500/12 px-5 py-3 text-sm font-semibold text-violet-100 transition hover:border-violet-300/35 hover:bg-violet-500/18"
                 />
               ))}
             </div>
@@ -44,8 +44,8 @@ export default function CareerPage() {
                 { label: 'Upcoming deadlines', value: '1' },
                 { label: 'AI nudges scheduled', value: '3' },
               ].map((metric) => (
-                <div key={metric.label} className="rounded-[1.75rem] bg-[#061229]/95 p-4 text-sm text-[#D7E6FF]">
-                  <p className="uppercase tracking-[0.28em] text-[#8ec6ff]">{metric.label}</p>
+                <div key={metric.label} className="rounded-[1.75rem] border border-white/10 bg-[#0A0B1B]/95 p-4 text-sm text-[#D7E6FF]">
+                  <p className="uppercase tracking-[0.28em] text-violet-200">{metric.label}</p>
                   <p className="mt-3 text-2xl font-semibold text-white">{metric.value}</p>
                 </div>
               ))}

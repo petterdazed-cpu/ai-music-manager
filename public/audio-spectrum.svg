@@ -1,0 +1,49 @@
+<svg width="1600" height="88" viewBox="0 0 1600 88" fill="none" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+  <defs>
+    <filter id="spectrumGlow" x="-30%" y="-80%" width="160%" height="220%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="2.5" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0.78 0 0 0 0 0.13 0 0 0 0 1 0 0 0 0.9 0"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <linearGradient id="barGradient" x1="0" y1="44" x2="1600" y2="44" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2563EB" stop-opacity="0.16"/>
+      <stop offset="0.22" stop-color="#8B5CF6" stop-opacity="1"/>
+      <stop offset="0.5" stop-color="#F0ABFC" stop-opacity="0.84"/>
+      <stop offset="0.76" stop-color="#A855F7" stop-opacity="1"/>
+      <stop offset="1" stop-color="#2563EB" stop-opacity="0.2"/>
+    </linearGradient>
+    <mask id="fade">
+      <linearGradient id="fadeX" x1="0" y1="44" x2="1600" y2="44" gradientUnits="userSpaceOnUse">
+        <stop stop-color="white" stop-opacity="0"/>
+        <stop offset="0.08" stop-color="white" stop-opacity="0.72"/>
+        <stop offset="0.5" stop-color="white"/>
+        <stop offset="0.92" stop-color="white" stop-opacity="0.72"/>
+        <stop offset="1" stop-color="white" stop-opacity="0"/>
+      </linearGradient>
+      <rect width="1600" height="88" fill="url(#fadeX)"/>
+    </mask>
+  </defs>
+  <g mask="url(#fade)" filter="url(#spectrumGlow)">
+    <path d="M0 74H1600" stroke="url(#barGradient)" stroke-opacity="0.62"/>
+    <g stroke="url(#barGradient)" stroke-width="2.2" stroke-linecap="round">
+      <path d="M4 74V68"/><path d="M18 74V62"/><path d="M32 74V70"/><path d="M46 74V57"/><path d="M60 74V64"/><path d="M74 74V49"/><path d="M88 74V66"/><path d="M102 74V59"/>
+      <path d="M116 74V72"/><path d="M130 74V52"/><path d="M144 74V43"/><path d="M158 74V61"/><path d="M172 74V67"/><path d="M186 74V54"/><path d="M200 74V70"/><path d="M214 74V62"/>
+      <path d="M228 74V36"/><path d="M242 74V28"/><path d="M256 74V46"/><path d="M270 74V66"/><path d="M284 74V59"/><path d="M298 74V70"/><path d="M312 74V50"/><path d="M326 74V63"/>
+      <path d="M340 74V70"/><path d="M354 74V55"/><path d="M368 74V45"/><path d="M382 74V67"/><path d="M396 74V61"/><path d="M410 74V53"/><path d="M424 74V70"/><path d="M438 74V65"/>
+      <path d="M452 74V48"/><path d="M466 74V39"/><path d="M480 74V58"/><path d="M494 74V68"/><path d="M508 74V62"/><path d="M522 74V70"/><path d="M536 74V54"/><path d="M550 74V47"/>
+      <path d="M564 74V66"/><path d="M578 74V57"/><path d="M592 74V34"/><path d="M606 74V22"/><path d="M620 74V42"/><path d="M634 74V59"/><path d="M648 74V70"/><path d="M662 74V61"/>
+      <path d="M676 74V50"/><path d="M690 74V37"/><path d="M704 74V55"/><path d="M718 74V67"/><path d="M732 74V62"/><path d="M746 74V70"/><path d="M760 74V58"/><path d="M774 74V43"/>
+      <path d="M788 74V63"/><path d="M802 74V69"/><path d="M816 74V51"/><path d="M830 74V40"/><path d="M844 74V58"/><path d="M858 74V70"/><path d="M872 74V64"/><path d="M886 74V46"/>
+      <path d="M900 74V31"/><path d="M914 74V52"/><path d="M928 74V65"/><path d="M942 74V70"/><path d="M956 74V56"/><path d="M970 74V44"/><path d="M984 74V62"/><path d="M998 74V68"/>
+      <path d="M1012 74V49"/><path d="M1026 74V36"/><path d="M1040 74V54"/><path d="M1054 74V70"/><path d="M1068 74V62"/><path d="M1082 74V51"/><path d="M1096 74V28"/><path d="M1110 74V17"/>
+      <path d="M1124 74V38"/><path d="M1138 74V58"/><path d="M1152 74V70"/><path d="M1166 74V63"/><path d="M1180 74V50"/><path d="M1194 74V42"/><path d="M1208 74V60"/><path d="M1222 74V68"/>
+      <path d="M1236 74V55"/><path d="M1250 74V46"/><path d="M1264 74V64"/><path d="M1278 74V70"/><path d="M1292 74V58"/><path d="M1306 74V37"/><path d="M1320 74V26"/><path d="M1334 74V48"/>
+      <path d="M1348 74V66"/><path d="M1362 74V70"/><path d="M1376 74V60"/><path d="M1390 74V53"/><path d="M1404 74V68"/><path d="M1418 74V61"/><path d="M1432 74V42"/><path d="M1446 74V31"/>
+      <path d="M1460 74V50"/><path d="M1474 74V66"/><path d="M1488 74V70"/><path d="M1502 74V56"/><path d="M1516 74V47"/><path d="M1530 74V63"/><path d="M1544 74V69"/><path d="M1558 74V54"/>
+      <path d="M1572 74V44"/><path d="M1586 74V62"/><path d="M1600 74V70"/>
+    </g>
+  </g>
+</svg>

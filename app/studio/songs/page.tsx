@@ -63,7 +63,7 @@ export default function StudioSongsPage() {
     >
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
         <div className="space-y-6">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-white/[0.04] p-8 shadow-[0_20px_90px_rgba(10,132,255,0.14)] backdrop-blur-xl">
+          <div className="rounded-[2rem] border border-violet-300/15 bg-white/[0.04] p-8 shadow-[0_24px_90px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <h2 className="text-3xl font-semibold">Song library</h2>
@@ -72,7 +72,7 @@ export default function StudioSongsPage() {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="rounded-full bg-[#0ea5ff] px-6 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+                className="rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-6 py-3 text-sm font-semibold text-white transition hover:brightness-110"
               >
                 Upload song
               </button>
@@ -86,7 +86,7 @@ export default function StudioSongsPage() {
               onChange={handleUpload}
             />
             {uploadStatus ? (
-              <div className="mt-5 rounded-[1.5rem] border border-[#0ea5e9]/15 bg-[#061229]/95 px-4 py-3 text-sm text-[#D7E6FF]">
+              <div className="mt-5 rounded-[1.5rem] border border-violet-300/15 bg-[#0A0B1B]/95 px-4 py-3 text-sm text-[#D7E6FF]">
                 {uploadStatus}
               </div>
             ) : null}
@@ -97,11 +97,11 @@ export default function StudioSongsPage() {
               <Link
                 key={song.id}
                 href={`/studio/songs/${song.id}`}
-                className="group rounded-[1.75rem] border border-[#0ea5e9]/15 bg-[#041227]/95 p-6 transition hover:border-[#0ea5ff]/30 hover:bg-[#0ea5ff]/5"
+                className="group rounded-[1.75rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-6 transition hover:border-violet-300/35 hover:bg-violet-500/10"
               >
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">{song.status}</p>
+                    <p className="text-sm uppercase tracking-[0.3em] text-violet-200">{song.status}</p>
                     <h3 className="mt-3 text-2xl font-semibold text-white">{song.title}</h3>
                     <p className="mt-2 text-sm text-[#B7C8DA]">{song.genre} · {song.mood} · {song.bpm} BPM · {song.key}</p>
                   </div>
@@ -109,9 +109,9 @@ export default function StudioSongsPage() {
                     {song.uploadDate}
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-[#AED7FF]">
+                <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-violet-100">
                   <span>{song.artist}</span>
-                  <span className="h-1.5 w-1.5 rounded-full bg-[#0ea5ff]" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300" />
                   <span>{song.collaborators}</span>
                 </div>
               </Link>
@@ -120,8 +120,8 @@ export default function StudioSongsPage() {
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_20px_90px_rgba(10,132,255,0.16)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Your pipeline</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-black/60 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Your pipeline</p>
             <div className="mt-6 space-y-4 text-sm text-[#D7E6FF]">
               <p>Track progress across demo, mixing and master stages.</p>
               <p>Use uploaded songs to start campaign planning, press pitches and playlist outreach.</p>
@@ -134,17 +134,17 @@ export default function StudioSongsPage() {
                   result={label.includes('Draft') ? 'Draft created' : 'Task created'}
                   title={`${label} ready`}
                   message={`Alex prepared a prototype ${label.toLowerCase()} workflow for your songs library.`}
-                  className="rounded-full bg-[#0ea5ff]/10 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15"
+                  className="rounded-full bg-violet-500/12 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-violet-500/18"
                 />
               ))}
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#041227]/95 p-6 shadow-[0_20px_90px_rgba(10,132,255,0.14)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">AI manager assist</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.18)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">AI manager assist</p>
             <h3 className="mt-4 text-2xl font-semibold text-white">Track release readiness</h3>
             <p className="mt-3 text-sm text-[#B7C8DA]">Alex will remind you when metadata, artwork or campaign planning still need attention.</p>
-            <div className="mt-6 space-y-3 rounded-[1.75rem] bg-[#061229]/95 p-4 text-sm text-[#D7E6FF]">
+            <div className="mt-6 space-y-3 rounded-[1.75rem] bg-[#0A0B1B]/95 p-4 text-sm text-[#D7E6FF]">
               <p>“This track may fit Nordic synth playlists.”</p>
               <p>“You still need artwork and metadata.”</p>
               <p>“This could be ready for release in 2 weeks.”</p>

@@ -139,10 +139,10 @@ export default function StudioPage() {
       subtitle="This is where your music lives: demos, active records, releases, collaborations and the assets around them."
     >
       <div className="space-y-8">
-        <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#030914]/95 p-6 shadow-[0_24px_90px_rgba(10,132,255,0.18)] backdrop-blur-xl">
+        <div className="rounded-[2rem] border border-violet-300/15 bg-[#080713]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.22)] backdrop-blur-xl">
           <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Artist workspace</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Artist workspace</p>
               <h2 className="mt-3 text-4xl font-semibold text-white">Aurora Lane music library</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B7C8DA]">
                 Track what is raw, what is moving, what is out, who is involved and what still needs assets before a campaign can breathe.
@@ -155,7 +155,7 @@ export default function StudioPage() {
                 { label: 'Ready assets', value: songs.filter((song) => song.assets).length },
               ].map((stat) => (
                 <div key={stat.label} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4 text-sm text-[#D7E6FF]">
-                  <p className="uppercase tracking-[0.26em] text-[#8ec6ff]">{stat.label}</p>
+                  <p className="uppercase tracking-[0.26em] text-violet-200">{stat.label}</p>
                   <p className="mt-2 text-2xl font-semibold text-white">{stat.value}</p>
                 </div>
               ))}
@@ -164,14 +164,14 @@ export default function StudioPage() {
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
-          <section className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-5 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
-            <div className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-white/10 bg-[#050d19]/90 p-2">
+          <section className="rounded-[2rem] border border-violet-300/15 bg-[#070816]/88 p-5 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+            <div className="flex gap-2 overflow-x-auto rounded-[1.5rem] border border-white/10 bg-[#050611]/90 p-2">
               {tabs.map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
-                  className={`flex-shrink-0 rounded-[1.15rem] px-4 py-3 text-sm font-semibold transition ${activeTab === tab ? 'bg-[#0ea5ff] text-black' : 'text-[#D7E6FF] hover:bg-white/10'}`}
+                  className={`flex-shrink-0 rounded-[1.15rem] px-4 py-3 text-sm font-semibold transition ${activeTab === tab ? 'bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 text-white shadow-[0_0_22px_rgba(139,92,246,0.24)]' : 'text-[#D7E6FF] hover:bg-white/10'}`}
                 >
                   {tab}
                 </button>
@@ -183,27 +183,27 @@ export default function StudioPage() {
                 <Link
                   key={song.id}
                   href={`/studio/songs/${song.id}`}
-                  className="group rounded-[1.75rem] border border-[#0ea5e9]/15 bg-[#041227]/95 p-5 transition hover:border-[#0ea5ff]/30 hover:bg-[#0ea5ff]/5"
+                  className="group rounded-[1.75rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-5 transition hover:border-violet-300/35 hover:bg-violet-500/10"
                 >
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
-                        <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs uppercase tracking-[0.24em] text-[#AED7FF]">{song.status}</span>
-                        <span className="text-sm text-[#8ec6ff]">{song.genre}</span>
+                        <span className="rounded-full bg-violet-500/12 px-3 py-1 text-xs uppercase tracking-[0.24em] text-violet-100">{song.status}</span>
+                        <span className="text-sm text-violet-200">{song.genre}</span>
                       </div>
                       <h3 className="mt-4 text-2xl font-semibold text-white">{song.title}</h3>
                       <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B7C8DA]">{song.notes}</p>
                     </div>
-                    <div className="rounded-[1.25rem] border border-white/10 bg-[#071426]/95 px-4 py-3 text-right text-sm text-[#D7E6FF]">
+                    <div className="rounded-[1.25rem] border border-white/10 bg-[#050611]/95 px-4 py-3 text-right text-sm text-[#D7E6FF]">
                       <p>{song.bpm} BPM</p>
-                      <p className="mt-1 text-[#8ec6ff]">{song.lastUpdated}</p>
+                      <p className="mt-1 text-violet-200">{song.lastUpdated}</p>
                     </div>
                   </div>
                   <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-white/[0.035] p-4 text-sm leading-6 text-[#D7E6FF]">
                     <span className="font-semibold text-white">Alex:</span> {song.alexRecommendation}
                   </div>
                   {(song.collaborators || song.assets) ? (
-                    <div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">
+                    <div className="mt-4 flex flex-wrap gap-3 text-xs uppercase tracking-[0.22em] text-violet-200">
                       {song.collaborators ? <span>Collabs: {song.collaborators}</span> : null}
                       {song.assets ? <span>Assets: {song.assets}</span> : null}
                     </div>
@@ -212,7 +212,7 @@ export default function StudioPage() {
               ))}
 
               {!visibleSongs.length ? (
-                <div className="rounded-[1.75rem] border border-white/10 bg-[#041227]/95 p-8 text-sm text-[#B7C8DA]">
+                <div className="rounded-[1.75rem] border border-white/10 bg-[#0A0B1B]/95 p-8 text-sm text-[#B7C8DA]">
                   No songs in this lane yet. Upload a demo or move a track here when it is ready.
                 </div>
               ) : null}
@@ -220,18 +220,18 @@ export default function StudioPage() {
           </section>
 
           <aside className="space-y-6">
-            <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#041227]/95 p-6 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
+            <div className="rounded-[2rem] border border-violet-300/15 bg-[#090A1A]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Upload song</p>
+                  <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Upload song</p>
                   <h3 className="mt-3 text-2xl font-semibold text-white">Add a new demo</h3>
                 </div>
-                <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs text-[#AED7FF]">Step {uploadStep}/4</span>
+                <span className="rounded-full bg-violet-500/12 px-3 py-1 text-xs text-violet-100">Step {uploadStep}/4</span>
               </div>
 
               <div className="mt-6 grid grid-cols-4 gap-2">
                 {['Upload', 'Metadata', 'Save', 'Library'].map((step, index) => (
-                  <div key={step} className={`h-2 rounded-full ${uploadStep >= index + 1 ? 'bg-[#0ea5ff]' : 'bg-white/10'}`} />
+                  <div key={step} className={`h-2 rounded-full ${uploadStep >= index + 1 ? 'bg-gradient-to-r from-violet-400 to-cyan-300' : 'bg-white/10'}`} />
                 ))}
               </div>
 
@@ -241,7 +241,7 @@ export default function StudioPage() {
                     <button
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full rounded-[1.5rem] border border-[#0ea5e9]/20 bg-[#0ea5ff]/10 px-5 py-5 text-left transition hover:bg-[#0ea5ff]/15"
+                      className="w-full rounded-[1.5rem] border border-violet-300/20 bg-violet-500/12 px-5 py-5 text-left transition hover:bg-violet-500/18"
                     >
                       <span className="block text-lg font-semibold text-white">Choose audio file</span>
                       <span className="mt-2 block text-sm text-[#B7C8DA]">WAV, MP3 or demo bounce. This prototype stores it as a library entry.</span>
@@ -253,29 +253,29 @@ export default function StudioPage() {
                 {uploadStep === 2 ? (
                   <div className="space-y-4">
                     <div>
-                      <label className="text-xs uppercase tracking-[0.28em] text-[#8ec6ff]">Title</label>
+                      <label className="text-xs uppercase tracking-[0.28em] text-violet-200">Title</label>
                       <input
                         value={draftTitle}
                         onChange={(event) => setDraftTitle(event.target.value)}
-                        className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-[#0ea5ff]/40"
+                        className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-violet-300/45"
                       />
                     </div>
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div>
-                        <label className="text-xs uppercase tracking-[0.28em] text-[#8ec6ff]">Genre</label>
+                        <label className="text-xs uppercase tracking-[0.28em] text-violet-200">Genre</label>
                         <input
                           value={draftGenre}
                           onChange={(event) => setDraftGenre(event.target.value)}
-                          className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-[#0ea5ff]/40"
+                          className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-violet-300/45"
                         />
                       </div>
                       <div>
-                        <label className="text-xs uppercase tracking-[0.28em] text-[#8ec6ff]">BPM</label>
+                        <label className="text-xs uppercase tracking-[0.28em] text-violet-200">BPM</label>
                         <input
                           type="number"
                           value={draftBpm}
                           onChange={(event) => setDraftBpm(Number(event.target.value))}
-                          className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-[#0ea5ff]/40"
+                          className="mt-2 w-full rounded-[1.25rem] border border-white/10 bg-black/40 px-4 py-3 text-sm text-white outline-none focus:border-violet-300/45"
                         />
                       </div>
                     </div>
@@ -285,7 +285,7 @@ export default function StudioPage() {
                         setUploadStep(3);
                         setUploadMessage('Metadata locked. Review the demo card before it lands in the library.');
                       }}
-                      className="w-full rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+                      className="w-full rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.24)] transition hover:brightness-110"
                     >
                       Review upload
                     </button>
@@ -295,9 +295,9 @@ export default function StudioPage() {
                 {uploadStep === 3 ? (
                   <div className="space-y-4">
                     <div className="rounded-[1.5rem] border border-white/10 bg-black/35 p-4">
-                      <p className="text-xs uppercase tracking-[0.28em] text-[#8ec6ff]">Ready to save</p>
+                      <p className="text-xs uppercase tracking-[0.28em] text-violet-200">Ready to save</p>
                       <h4 className="mt-3 text-xl font-semibold text-white">{draftTitle || 'Untitled demo'}</h4>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs uppercase tracking-[0.2em] text-[#AED7FF]">
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs uppercase tracking-[0.2em] text-violet-100">
                         <span>{draftGenre}</span>
                         <span>{draftBpm} BPM</span>
                         {selectedFileName ? <span>{selectedFileName}</span> : null}
@@ -317,7 +317,7 @@ export default function StudioPage() {
                       <button
                         type="button"
                         onClick={saveUploadedSong}
-                        className="rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]"
+                        className="rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.24)] transition hover:brightness-110"
                       >
                         Save to Demos
                       </button>
@@ -327,7 +327,7 @@ export default function StudioPage() {
 
                 {uploadStep === 4 ? (
                   <div className="space-y-4">
-                    <div className="rounded-[1.5rem] border border-[#0ea5e9]/15 bg-[#061229]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
+                    <div className="rounded-[1.5rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
                       {uploadMessage}
                     </div>
                     <button
@@ -339,15 +339,15 @@ export default function StudioPage() {
                     </button>
                   </div>
                 ) : uploadMessage ? (
-                  <div className="rounded-[1.5rem] border border-[#0ea5e9]/15 bg-[#061229]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
+                  <div className="rounded-[1.5rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
                     {uploadMessage}
                   </div>
                 ) : null}
               </div>
             </div>
 
-            <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Alex studio read</p>
+            <div className="rounded-[2rem] border border-violet-300/15 bg-[#070816]/88 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Alex studio read</p>
               <h3 className="mt-3 text-2xl font-semibold text-white">Midnight Drive is the closest to campaign-ready.</h3>
               <p className="mt-3 text-sm leading-6 text-[#B7C8DA]">
                 Finish the bridge edit, export a rough master, then decide if Northern Lights stays a B-side or becomes the next teaser.

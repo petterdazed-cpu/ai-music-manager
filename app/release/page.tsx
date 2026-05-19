@@ -32,7 +32,7 @@ const releases: Release[] = [
     distributionStatus: 'Draft saved, metadata review open',
     progress: 64,
     coverInitials: 'NL',
-    coverClassName: 'from-[#0ea5ff] via-[#7dd3fc] to-[#f9a8d4]',
+    coverClassName: 'from-violet-500 via-indigo-500 to-fuchsia-300',
     managerRead: 'Best next move: lock the hook clip and send playlist pitches 14 days before release.',
   },
   {
@@ -86,8 +86,8 @@ const commandMetrics = [
   { label: 'Next deadline', value: 'Jun 7', detail: 'Northern Lights pitch window opens' },
 ];
 
-const actionClassName = 'rounded-full bg-[#0ea5ff] px-4 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]';
-const secondaryActionClassName = 'rounded-full bg-white/5 px-4 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10';
+const actionClassName = 'rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-4 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.24)] transition hover:brightness-110';
+const secondaryActionClassName = 'rounded-full border border-violet-300/15 bg-white/[0.06] px-4 py-3 text-sm font-semibold text-violet-100 transition hover:border-violet-300/35 hover:bg-violet-500/12';
 
 export default function ReleasePage() {
   return (
@@ -96,10 +96,10 @@ export default function ReleasePage() {
       subtitle="Plan launches, track campaigns, keep distribution clean and make sure every release has a real next move."
     >
       <div className="space-y-8">
-        <section className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#030914]/95 p-6 shadow-[0_24px_90px_rgba(10,132,255,0.18)] backdrop-blur-xl">
+        <section className="rounded-[2rem] border border-violet-300/15 bg-[#080713]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.22)] backdrop-blur-xl">
           <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr] xl:items-end">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Release command center</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Release command center</p>
               <h2 className="mt-3 text-4xl font-semibold text-white">Aurora Lane launch pipeline</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B7C8DA]">
                 A working view of what is coming, what is live and what has already shipped, with the campaign details artists actually need.
@@ -108,7 +108,7 @@ export default function ReleasePage() {
             <div className="grid gap-3 sm:grid-cols-2">
               {commandMetrics.map((metric) => (
                 <div key={metric.label} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4">
-                  <p className="text-xs uppercase tracking-[0.26em] text-[#8ec6ff]">{metric.label}</p>
+                  <p className="text-xs uppercase tracking-[0.26em] text-violet-200">{metric.label}</p>
                   <p className="mt-2 text-2xl font-semibold text-white">{metric.value}</p>
                   <p className="mt-2 text-xs leading-5 text-[#B7C8DA]">{metric.detail}</p>
                 </div>
@@ -125,7 +125,7 @@ export default function ReleasePage() {
               <section key={lane} className="space-y-4">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">{lane}</p>
+                    <p className="text-sm uppercase tracking-[0.3em] text-violet-200">{lane}</p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">{laneReleases.length} release{laneReleases.length === 1 ? '' : 's'}</h3>
                   </div>
                   <PrototypeAction
@@ -139,7 +139,7 @@ export default function ReleasePage() {
 
                 <div className="grid gap-5 xl:grid-cols-2">
                   {laneReleases.map((release) => (
-                    <article key={release.title} className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-5 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
+                    <article key={release.title} className="rounded-[2rem] border border-violet-300/15 bg-[#070816]/88 p-5 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
                       <div className="grid gap-5 md:grid-cols-[168px_1fr]">
                         <div className={`flex aspect-square items-end justify-between rounded-[1.75rem] bg-gradient-to-br ${release.coverClassName} p-4 shadow-[inset_0_0_70px_rgba(0,0,0,0.28)]`}>
                           <span className="text-4xl font-semibold text-white">{release.coverInitials}</span>
@@ -149,10 +149,10 @@ export default function ReleasePage() {
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="text-xs uppercase tracking-[0.26em] text-[#8ec6ff]">{release.date}</p>
+                              <p className="text-xs uppercase tracking-[0.26em] text-violet-200">{release.date}</p>
                               <h4 className="mt-2 text-2xl font-semibold text-white">{release.title}</h4>
                             </div>
-                            <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs uppercase tracking-[0.22em] text-[#AED7FF]">
+                            <span className="rounded-full bg-violet-500/12 px-3 py-1 text-xs uppercase tracking-[0.22em] text-violet-100">
                               {release.campaignStatus}
                             </span>
                           </div>
@@ -164,21 +164,21 @@ export default function ReleasePage() {
                               ['Distribution', release.distributionStatus],
                               ['Campaign status', release.campaignStatus],
                             ].map(([label, value]) => (
-                              <div key={label} className="rounded-[1.25rem] border border-white/10 bg-[#061229]/95 p-4">
-                                <p className="text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">{label}</p>
+                              <div key={label} className="rounded-[1.25rem] border border-white/10 bg-[#0A0B1B]/95 p-4">
+                                <p className="text-xs uppercase tracking-[0.22em] text-violet-200">{label}</p>
                                 <p className="mt-2 text-sm leading-5 text-[#D7E6FF]">{value}</p>
                               </div>
                             ))}
                           </div>
 
                           <div className="mt-5">
-                            <div className="flex items-center justify-between text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">
+                            <div className="flex items-center justify-between text-xs uppercase tracking-[0.22em] text-violet-200">
                               <span>Timeline progress</span>
                               <span>{release.progress}%</span>
                             </div>
                             <div className="mt-3 h-3 overflow-hidden rounded-full bg-white/10">
                               <div
-                                className="h-full rounded-full bg-gradient-to-r from-[#0ea5ff] via-[#7dd3fc] to-[#22c55e]"
+                                className="h-full rounded-full bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-300"
                                 style={{ width: `${release.progress}%` }}
                               />
                             </div>

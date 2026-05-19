@@ -13,16 +13,16 @@ export default function OpportunitiesPage() {
           <Link
             key={opportunity.id}
             href={`/opportunities/${opportunity.id}`}
-            className="group rounded-[2rem] border border-[#0ea5e9]/15 bg-white/[0.04] p-6 text-left transition hover:border-[#0ea5e9]/25 hover:bg-[#0ea5ff]/5"
+            className="group rounded-[2rem] border border-violet-300/15 bg-white/[0.04] p-6 text-left transition hover:border-violet-300/25 hover:bg-violet-500/10"
           >
             <div className="flex items-center justify-between gap-4">
               <div>
-                <span className="inline-flex rounded-full bg-[#0ea5e9]/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-[#AED7FF]">
+                <span className="inline-flex rounded-full bg-violet-500/12 px-3 py-1 text-xs uppercase tracking-[0.3em] text-violet-100">
                   {opportunity.type}
                 </span>
                 <h2 className="mt-4 text-2xl font-semibold text-white">{opportunity.headline}</h2>
               </div>
-              <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-[#0ea5e9]/10 text-xl text-[#0ea5ff]">
+              <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-violet-500/12 text-xl text-violet-200">
                 {opportunity.source.charAt(0)}
               </div>
             </div>
@@ -33,9 +33,9 @@ export default function OpportunitiesPage() {
               <div>Deadline {opportunity.deadline}</div>
             </div>
             <p className="mt-4 text-sm text-[#D7E6FF]">{opportunity.summary}</p>
-            <div className="mt-5 flex items-center justify-between text-sm text-[#8ec6ff]">
+            <div className="mt-5 flex items-center justify-between text-sm text-violet-200">
               <span>{opportunity.source}</span>
-              <span className="text-[#0ea5ff] transition group-hover:text-white">View details →</span>
+              <span className="text-violet-200 transition group-hover:text-white">View details →</span>
             </div>
           </Link>
         ))}

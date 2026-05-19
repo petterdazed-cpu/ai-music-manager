@@ -20,7 +20,7 @@ export default function SettingsPage() {
     >
       <div className="space-y-10">
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Profile</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">Your artist profile settings and manager preferences.</p>
             <div className="mt-6 space-y-4">
@@ -35,7 +35,7 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Notification settings</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">Control how Alex reaches out about your music career.</p>
             <div className="mt-6 space-y-4">
@@ -44,10 +44,10 @@ export default function SettingsPage() {
                   key={item}
                   type="button"
                   onClick={() => setNotifications((current) => ({ ...current, [item]: !current[item] }))}
-                  className="flex w-full items-center justify-between rounded-3xl bg-black/60 p-4 text-left transition hover:bg-[#0ea5ff]/10"
+                  className="flex w-full items-center justify-between rounded-3xl bg-black/60 p-4 text-left transition hover:bg-violet-500/12"
                 >
                   <p className="text-sm text-[#E5EAF8]">{item}</p>
-                  <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs text-[#AED7FF]">{notifications[item] ? 'On' : 'Off'}</span>
+                  <span className="rounded-full bg-violet-500/12 px-3 py-1 text-xs text-violet-100">{notifications[item] ? 'On' : 'Off'}</span>
                 </button>
               ))}
             </div>
@@ -55,26 +55,26 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Language</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">Select your preferred language for AIM interactions.</p>
             <select
               value={language}
               onChange={(event) => setLanguage(event.target.value)}
-              className="mt-6 w-full rounded-3xl border border-[#0ea5e9]/15 bg-black/60 p-4 text-lg font-semibold text-[#E5EAF8] outline-none"
+              className="mt-6 w-full rounded-3xl border border-violet-300/15 bg-black/60 p-4 text-lg font-semibold text-[#E5EAF8] outline-none focus:border-violet-300/45"
             >
               {['English', 'Swedish', 'Spanish'].map((option) => (
                 <option key={option} value={option}>{option}</option>
               ))}
             </select>
           </div>
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Timezone</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">Keep AIM aligned with your location and deadlines.</p>
             <select
               value={timezone}
               onChange={(event) => setTimezone(event.target.value)}
-              className="mt-6 w-full rounded-3xl border border-[#0ea5e9]/15 bg-black/60 p-4 text-lg font-semibold text-[#E5EAF8] outline-none"
+              className="mt-6 w-full rounded-3xl border border-violet-300/15 bg-black/60 p-4 text-lg font-semibold text-[#E5EAF8] outline-none focus:border-violet-300/45"
             >
               {['Stockholm (GMT+2)', 'London (GMT+1)', 'New York (GMT-4)', 'Los Angeles (GMT-7)'].map((option) => (
                 <option key={option} value={option}>{option}</option>
@@ -84,7 +84,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Connected accounts</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">Integrate streaming, distribution, and creative tools later.</p>
             <div className="mt-6 space-y-3">
@@ -95,12 +95,12 @@ export default function SettingsPage() {
                   result="Connection queued"
                   title={`${account} prototype connection queued`}
                   message={`AIM created a prototype ${account} connection task for the integrations roadmap.`}
-                  className="w-full rounded-3xl bg-black/60 p-4 text-left text-sm text-[#E5EAF8] transition hover:bg-[#0ea5ff]/10"
+                  className="w-full rounded-3xl bg-black/60 p-4 text-left text-sm text-[#E5EAF8] transition hover:bg-violet-500/12"
                 />
               ))}
             </div>
           </div>
-          <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-white/5 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+          <div className="rounded-[1.75rem] border border-violet-300/15 bg-white/[0.05] p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <h3 className="text-xl font-semibold">Data &amp; privacy</h3>
             <p className="mt-2 text-sm text-[#B7C8DA]">AIM will respect your music, your strategy and your privacy.</p>
             <PrototypeAction
@@ -108,12 +108,12 @@ export default function SettingsPage() {
               result="Privacy review opened"
               title="Privacy settings prototype opened"
               message="Alex prepared a prototype privacy review covering stored assets, chat history and integration permissions."
-              className="mt-6 w-full rounded-3xl bg-black/60 p-4 text-left text-sm text-[#E5EAF8] transition hover:bg-[#0ea5ff]/10"
+              className="mt-6 w-full rounded-3xl bg-black/60 p-4 text-left text-sm text-[#E5EAF8] transition hover:bg-violet-500/12"
             />
           </div>
         </div>
 
-        <div className="rounded-[1.75rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_15px_60px_rgba(0,118,255,0.14)]">
+        <div className="rounded-[1.75rem] border border-violet-300/15 bg-[#070816]/88 p-6 shadow-[0_18px_70px_rgba(109,40,217,0.18)] backdrop-blur-xl">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <p className="text-sm text-[#B7C8DA]">Current prototype settings: {language}, {timezone}, {Object.values(notifications).filter(Boolean).length}/3 notifications on.</p>
             <PrototypeAction

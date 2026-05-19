@@ -29,7 +29,7 @@ const goals: Goal[] = [
     credits: 120,
     target: '11 / 15 pitches sent',
     nextAction: 'Send the final 4 with a tighter one-line angle for Midnight Drive.',
-    accent: '#0ea5ff',
+    accent: '#8b5cf6',
   },
   {
     title: 'Finish EP',
@@ -53,7 +53,7 @@ const goals: Goal[] = [
     credits: 180,
     target: '2 / 3 gigs booked',
     nextAction: 'Follow up with Nordic Stage and send one new local support pitch.',
-    accent: '#38bdf8',
+    accent: '#c084fc',
   },
   {
     title: 'Release Northern Lights',
@@ -89,7 +89,7 @@ const goals: Goal[] = [
     credits: 260,
     target: '3 / 8 target venues in motion',
     nextAction: 'Package the live set with Afterglow proof points and a clean tech note.',
-    accent: '#14b8a6',
+    accent: '#22d3ee',
   },
 ];
 
@@ -100,8 +100,8 @@ const overview = [
   { label: 'Next deadline', value: 'Friday', detail: 'Curator pitching closes' },
 ];
 
-const actionClassName = 'rounded-full bg-[#0ea5ff] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#12b0ff]';
-const secondaryActionClassName = 'rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10';
+const actionClassName = 'rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-5 py-3 text-sm font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.24)] transition hover:brightness-110';
+const secondaryActionClassName = 'rounded-full border border-violet-300/15 bg-white/[0.06] px-5 py-3 text-sm font-semibold text-violet-100 transition hover:border-violet-300/35 hover:bg-violet-500/12';
 
 export default function GoalsPage() {
   return (
@@ -110,10 +110,10 @@ export default function GoalsPage() {
       subtitle="A sticky accountability system for release work, audience growth and long-range career momentum."
     >
       <div className="space-y-8">
-        <section className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#030914]/95 p-6 shadow-[0_24px_90px_rgba(10,132,255,0.18)] backdrop-blur-xl">
+        <section className="rounded-[2rem] border border-violet-300/15 bg-[#080713]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.22)] backdrop-blur-xl">
           <div className="grid gap-6 xl:grid-cols-[1.1fr_1fr] xl:items-end">
             <div>
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Accountability</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Accountability</p>
               <h2 className="mt-3 text-4xl font-semibold text-white">Momentum without noise</h2>
               <p className="mt-3 max-w-2xl text-sm leading-6 text-[#B7C8DA]">
                 Weekly execution, monthly campaign targets and career milestones in one calm system that keeps the next move visible.
@@ -122,7 +122,7 @@ export default function GoalsPage() {
             <div className="grid gap-3 sm:grid-cols-2">
               {overview.map((item) => (
                 <div key={item.label} className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] px-5 py-4">
-                  <p className="text-xs uppercase tracking-[0.26em] text-[#8ec6ff]">{item.label}</p>
+                  <p className="text-xs uppercase tracking-[0.26em] text-violet-200">{item.label}</p>
                   <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
                   <p className="mt-2 text-xs leading-5 text-[#B7C8DA]">{item.detail}</p>
                 </div>
@@ -140,14 +140,14 @@ export default function GoalsPage() {
             ][index];
 
             return (
-              <div key={label} className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_20px_80px_rgba(10,132,255,0.14)] backdrop-blur-xl">
+              <div key={label} className="rounded-[2rem] border border-violet-300/15 bg-[#070816]/88 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.18)] backdrop-blur-xl">
                 <div
                   className="mx-auto flex h-36 w-36 items-center justify-center rounded-full"
-                  style={{ background: `conic-gradient(#0ea5ff ${values.value}%, rgba(255,255,255,0.08) 0)` }}
+                  style={{ background: `conic-gradient(#8b5cf6 ${values.value}%, rgba(255,255,255,0.08) 0)` }}
                 >
-                  <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-[#030914]">
+                  <div className="flex h-28 w-28 flex-col items-center justify-center rounded-full bg-[#080713]">
                     <p className="text-3xl font-semibold text-white">{values.value}%</p>
-                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">{label}</p>
+                    <p className="mt-1 text-xs uppercase tracking-[0.22em] text-violet-200">{label}</p>
                   </div>
                 </div>
                 <p className="mt-5 text-center text-sm leading-6 text-[#B7C8DA]">{values.detail}</p>
@@ -164,7 +164,7 @@ export default function GoalsPage() {
               <section key={lane} className="space-y-4">
                 <div className="flex flex-wrap items-end justify-between gap-3">
                   <div>
-                    <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">{lane}</p>
+                    <p className="text-sm uppercase tracking-[0.3em] text-violet-200">{lane}</p>
                     <h3 className="mt-2 text-2xl font-semibold text-white">{laneGoals.length} active goals</h3>
                   </div>
                   <PrototypeAction
@@ -178,16 +178,16 @@ export default function GoalsPage() {
 
                 <div className="grid gap-5 xl:grid-cols-2">
                   {laneGoals.map((goal) => (
-                    <article key={goal.title} className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-5 shadow-[0_20px_80px_rgba(10,132,255,0.16)] backdrop-blur-xl">
+                    <article key={goal.title} className="rounded-[2rem] border border-violet-300/15 bg-[#070816]/88 p-5 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
                       <div className="flex flex-wrap items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs uppercase tracking-[0.28em] text-[#8ec6ff]">{goal.deadline}</p>
+                          <p className="text-xs uppercase tracking-[0.28em] text-violet-200">{goal.deadline}</p>
                           <h4 className="mt-3 text-2xl font-semibold text-white">{goal.title}</h4>
                           <p className="mt-3 text-sm leading-6 text-[#B7C8DA]">{goal.target}</p>
                         </div>
-                        <div className="rounded-[1.25rem] border border-white/10 bg-[#061229]/95 px-4 py-3 text-right">
+                        <div className="rounded-[1.25rem] border border-white/10 bg-[#0A0B1B]/95 px-4 py-3 text-right">
                           <p className="text-2xl font-semibold text-white">{goal.progress}%</p>
-                          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-[#8ec6ff]">Progress</p>
+                          <p className="mt-1 text-xs uppercase tracking-[0.2em] text-violet-200">Progress</p>
                         </div>
                       </div>
 
@@ -196,27 +196,27 @@ export default function GoalsPage() {
                           className="h-full rounded-full"
                           style={{
                             width: `${goal.progress}%`,
-                            background: `linear-gradient(90deg, ${goal.accent}, #7dd3fc)`,
+                            background: `linear-gradient(90deg, ${goal.accent}, #22d3ee)`,
                           }}
                         />
                       </div>
 
                       <div className="mt-5 grid gap-3 sm:grid-cols-3">
                         <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">Momentum</p>
+                          <p className="text-xs uppercase tracking-[0.22em] text-violet-200">Momentum</p>
                           <p className="mt-2 text-sm leading-5 text-[#D7E6FF]">{goal.momentum}</p>
                         </div>
                         <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">Streak</p>
+                          <p className="text-xs uppercase tracking-[0.22em] text-violet-200">Streak</p>
                           <p className="mt-2 text-sm leading-5 text-[#D7E6FF]">{goal.streak}</p>
                         </div>
                         <div className="rounded-[1.25rem] border border-white/10 bg-white/[0.035] p-4">
-                          <p className="text-xs uppercase tracking-[0.22em] text-[#8ec6ff]">AIM credits</p>
+                          <p className="text-xs uppercase tracking-[0.22em] text-violet-200">AIM credits</p>
                           <p className="mt-2 text-sm leading-5 text-[#D7E6FF]">+{goal.credits} on completion</p>
                         </div>
                       </div>
 
-                      <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[#061229]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
+                      <div className="mt-5 rounded-[1.5rem] border border-white/10 bg-[#0A0B1B]/95 p-4 text-sm leading-6 text-[#D7E6FF]">
                         <span className="font-semibold text-white">Alex:</span> {goal.nextAction}
                       </div>
 

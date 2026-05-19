@@ -15,67 +15,67 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
     <SectionLayout title="Opportunity detail" subtitle={opportunity.headline}>
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="space-y-6">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-white/[0.04] p-8 shadow-[0_20px_90px_rgba(10,132,255,0.14)] backdrop-blur-xl">
+          <div className="rounded-[2rem] border border-violet-300/15 bg-white/[0.04] p-8 shadow-[0_24px_90px_rgba(109,40,217,0.18)] backdrop-blur-xl">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">{opportunity.type}</p>
+                <p className="text-sm uppercase tracking-[0.3em] text-violet-200">{opportunity.type}</p>
                 <h2 className="mt-3 text-3xl font-semibold text-white">{opportunity.headline}</h2>
                 <p className="mt-4 text-sm text-[#B7C8DA]">{opportunity.summary}</p>
               </div>
-              <div className="flex flex-col items-end gap-3 rounded-[1.5rem] border border-white/10 bg-[#041227]/95 p-4 text-right">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#8ec6ff]">From</p>
+              <div className="flex flex-col items-end gap-3 rounded-[1.5rem] border border-white/10 bg-[#0A0B1B]/95 p-4 text-right">
+                <p className="text-xs uppercase tracking-[0.3em] text-violet-200">From</p>
                 <div className="text-lg font-semibold text-white">{opportunity.source}</div>
                 <p className="text-sm text-[#B7C8DA]">Deadline {opportunity.deadline}</p>
               </div>
             </div>
             <div className="mt-8 grid gap-4 sm:grid-cols-2">
               <div className="rounded-[1.75rem] bg-[#041C33]/95 p-5">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#8ec6ff]">Location</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-violet-200">Location</p>
                 <p className="mt-3 text-base font-semibold text-white">{opportunity.location}</p>
               </div>
               <div className="rounded-[1.75rem] bg-[#041C33]/95 p-5">
-                <p className="text-xs uppercase tracking-[0.3em] text-[#8ec6ff]">Genre fit</p>
+                <p className="text-xs uppercase tracking-[0.3em] text-violet-200">Genre fit</p>
                 <p className="mt-3 text-base font-semibold text-white">{opportunity.genres.join(', ')}</p>
               </div>
             </div>
             <div className="mt-8 space-y-4">
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Required assets</p>
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Required assets</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {opportunity.requiredAssets.map((asset) => (
-                  <div key={asset} className="rounded-3xl border border-white/10 bg-[#06152a]/95 px-4 py-3 text-sm text-[#D7E6FF]">
+                  <div key={asset} className="rounded-3xl border border-white/10 bg-[#0A0B1B]/95 px-4 py-3 text-sm text-[#D7E6FF]">
                     {asset}
                   </div>
                 ))}
               </div>
             </div>
-            <div className="mt-8 rounded-[1.75rem] border border-[#0ea5e9]/12 bg-[#06152a]/95 p-5">
-              <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Recommended next step</p>
+            <div className="mt-8 rounded-[1.75rem] border border-violet-300/12 bg-[#0A0B1B]/95 p-5">
+              <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Recommended next step</p>
               <p className="mt-3 text-sm leading-6 text-[#D7E6FF]">
                 Ask Alex to draft a concise outreach note, attach the strongest live clip or press asset, and turn the deadline into a follow-up task.
               </p>
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-8 shadow-[0_20px_90px_rgba(10,132,255,0.16)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Contact</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-black/60 p-8 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Contact</p>
             <div className="mt-5 space-y-3 text-sm text-[#D7E6FF]">
               <p><span className="font-semibold text-white">Email:</span> {opportunity.email}</p>
               <p><span className="font-semibold text-white">Source brief:</span> {opportunity.website}</p>
               <p><span className="font-semibold text-white">Submission deadline:</span> {opportunity.deadline}</p>
             </div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <PrototypeAction label="Open source brief" result="Brief opened" title="Source brief preview" message={`Alex opened a prototype source brief for ${opportunity.source} with contact notes, submission angle and asset checklist.`} className="rounded-full bg-[#0ea5ff]/10 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15" />
+              <PrototypeAction label="Open source brief" result="Brief opened" title="Source brief preview" message={`Alex opened a prototype source brief for ${opportunity.source} with contact notes, submission angle and asset checklist.`} className="rounded-full bg-violet-500/12 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-violet-500/18" />
               <PrototypeAction label="Draft submission email" result="Draft created" title="Submission email drafted" message={`Alex drafted outreach for ${opportunity.source} and queued it with this opportunity's deadline.`} />
               <PrototypeAction label="Build press kit" result="Press kit started" title="Press kit draft created" message="A prototype press kit checklist is ready with bio, artwork, link, and live proof placeholders." className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-white/10" />
-              <PrototypeAction label="Save for later" result="Saved" title="Opportunity saved" message="This opportunity was saved to your AIM follow-up queue." className="rounded-full bg-[#1a1f2d] px-5 py-3 text-sm font-semibold text-[#AED7FF] transition hover:bg-[#0ea5ff]/10" />
-              <PrototypeAction label="Turn into task" result="Task created" title="Opportunity task created" message="Alex created a prototype task with the deadline, source, and next action." className="rounded-full bg-[#0d1b32] px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-[#0ea5ff]/10" />
+              <PrototypeAction label="Save for later" result="Saved" title="Opportunity saved" message="This opportunity was saved to your AIM follow-up queue." className="rounded-full bg-violet-500/12 px-5 py-3 text-sm font-semibold text-violet-100 transition hover:bg-violet-500/12" />
+              <PrototypeAction label="Turn into task" result="Task created" title="Opportunity task created" message="Alex created a prototype task with the deadline, source, and next action." className="rounded-full bg-white/5 px-5 py-3 text-sm font-semibold text-[#D7E6FF] transition hover:bg-violet-500/12" />
             </div>
           </div>
         </div>
 
         <aside className="space-y-6">
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-[#041227]/95 p-6 shadow-[0_20px_90px_rgba(10,132,255,0.14)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">AI manager</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-[#0A0B1B]/95 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.18)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">AI manager</p>
             <h3 className="mt-4 text-2xl font-semibold text-white">This looks relevant for your artist profile.</h3>
             <p className="mt-4 text-sm text-[#B7C8DA]">Alex has flagged this opportunity as high priority for your next campaign and ready assets.</p>
             <div className="mt-6 space-y-3">
@@ -93,8 +93,8 @@ export default function OpportunityDetailPage({ params }: OpportunityDetailProps
             </div>
           </div>
 
-          <div className="rounded-[2rem] border border-[#0ea5e9]/15 bg-black/60 p-6 shadow-[0_20px_90px_rgba(10,132,255,0.16)] backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.3em] text-[#8ec6ff]">Opportunity quick facts</p>
+          <div className="rounded-[2rem] border border-violet-300/15 bg-black/60 p-6 shadow-[0_24px_90px_rgba(109,40,217,0.2)] backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.3em] text-violet-200">Opportunity quick facts</p>
             <div className="mt-6 space-y-4 text-sm text-[#D7E6FF]">
               <div className="rounded-3xl bg-[#081420]/95 px-4 py-3">Source: {opportunity.source}</div>
               <div className="rounded-3xl bg-[#081420]/95 px-4 py-3">Type: {opportunity.type}</div>

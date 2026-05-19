@@ -28,9 +28,28 @@ type ChatMessage = {
   attachments?: MockAttachment[];
   action?: ManagerAction;
 };
+type ArtistProfile = {
+  artistName?: string;
+  musicType?: string;
+  location?: string;
+  currentBuild?: string;
+  upcomingRelease?: string;
+  hardestThing?: string;
+  managerStyle?: string;
+};
+type StoredManagerSettings = {
+  archetype?: string;
+  pushIntensity?: number;
+  directness?: number;
+  emotionalSensitivity?: number;
+  initiative?: 'low' | 'medium' | 'high';
+  honestyStyle?: 'gentle' | 'balanced' | 'blunt';
+};
 
 const sleep = (ms: number) => new Promise((resolve) => window.setTimeout(resolve, ms));
 const studioSongsStorageKey = 'aimStudioSongs';
+const managerSettingsStorageKey = 'aimManagerSettings';
+const artistProfileStorageKey = 'artistProfile';
 
 const formatFileSize = (size: number) => {
   if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
@@ -53,6 +72,16 @@ const titleFromFileName = (fileName: string) => (
 );
 
 const hasAnyIntent = (text: string, phrases: string[]) => phrases.some((phrase) => text.includes(phrase));
+
+const loadStoredManagerSettings = (): StoredManagerSettings | undefined => {
+  const stored = window.localStorage.getItem(managerSettingsStorageKey);
+  if (!stored) return undefined;
+  try {
+    return JSON.parse(stored) as StoredManagerSettings;
+  } catch {
+    return undefined;
+  }
+};
 
 export default function Home() {
   const defaultNavItems = [
@@ -77,12 +106,13 @@ export default function Home() {
   const [placeholder, setPlaceholder] = useState("Ask Alex anything about your music career...");
   const [suggestions, setSuggestions] = useState(defaultSuggestions);
   const [feedItems, setFeedItems] = useState<FeedItem[]>(industryFeed);
-  const [logoSize, setLogoSize] = useState(500);
+  const [logoSize, setLogoSize] = useState(270);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [assistantActivity, setAssistantActivity] = useState<AssistantActivity>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [attachments, setAttachments] = useState<MockAttachment[]>([]);
+  const [artistProfile, setArtistProfile] = useState<ArtistProfile | null>(null);
   const [errorText, setErrorText] = useState<string | null>(null);
   const streamQueueRef = useRef('');
   const revealQueueRef = useRef<RevealChunk[]>([]);
@@ -128,8 +158,15 @@ export default function Home() {
       }
 
       const storedLogoSize = localStorage.getItem('logoSize');
-      if (storedLogoSize) setLogoSize(parseInt(storedLogoSize));
-      else setLogoSize(500);
+      if (storedLogoSize) setLogoSize(Math.min(parseInt(storedLogoSize), 300));
+      else setLogoSize(270);
+
+      const storedArtistProfile = localStorage.getItem(artistProfileStorageKey);
+      if (storedArtistProfile) {
+        try {
+          setArtistProfile(JSON.parse(storedArtistProfile) as ArtistProfile);
+        } catch {}
+      }
     };
 
     const hydrationTimer = window.setTimeout(hydrateStoredContent, 0);
@@ -461,13 +498,20 @@ export default function Home() {
         ? `\n\nAttached files: ${sentAttachments.map((file) => `${file.name} (${file.category}, ${formatFileSize(file.size)})`).join(', ')}`
         : '';
       const apiMessage = `${userText || 'I attached files for you to review.'}${attachmentContext}`;
+      const managerSettings = loadStoredManagerSettings();
+      const profileContext = artistProfile
+        ? `\n\nArtist profile: releases as ${artistProfile.artistName || 'unknown'}, makes ${artistProfile.musicType || 'music'}, based in ${artistProfile.location || 'unknown'}, building ${artistProfile.currentBuild || 'their next move'}, current blocker: ${artistProfile.hardestThing || 'unknown'}.`
+        : '';
 
       console.log('Sending message to /api/chat', apiMessage);
 
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: apiMessage }),
+        body: JSON.stringify({
+          message: `${apiMessage}${profileContext}`,
+          managerSettings,
+        }),
       });
 
       if (!res.ok || !res.body) {
@@ -554,48 +598,82 @@ export default function Home() {
     }
   };
 
+  const alexGreeting = artistProfile?.currentBuild
+    ? `Morning. We’re building toward ${artistProfile.currentBuild.toLowerCase()}. Want to work on rollout, demos, or outreach today?`
+    : 'Morning. What are we moving forward today — release, promo, or strategy?';
+
+  const matchedForYou = [
+    { title: 'Bassist in Stockholm seeking band', type: 'COLLAB', time: 'New match', tone: 'from-violet-500/20 text-violet-100' },
+    { title: 'Sync brief match for “Midnight Drive”', type: 'SYNC', time: '1h ago', tone: 'from-blue-500/20 text-cyan-100' },
+    { title: 'Nordic pop playlist fit', type: 'PLAYLIST', time: '2h ago', tone: 'from-fuchsia-500/20 text-fuchsia-100' },
+    { title: 'Festival application deadline', type: 'LIVE', time: 'Due Friday', tone: 'from-amber-500/20 text-amber-100' },
+    { title: 'Label scouting opportunity', type: 'A&R', time: 'High fit', tone: 'from-emerald-500/20 text-emerald-100' },
+  ];
+
+  const alexActions = [
+    { title: 'Approve EPK draft', detail: 'Bio and press angle are ready for review.' },
+    { title: 'Confirm artwork', detail: 'Final square crop is waiting on approval.' },
+    { title: 'Review release plan', detail: 'Northern Lights timeline has 3 open decisions.' },
+    { title: 'Send outreach draft', detail: 'Curator email is staged, not sent.' },
+    { title: 'Schedule promo content', detail: 'Two short-form clips need dates.' },
+  ];
+
   return (
-    <main className="min-h-screen bg-black text-white relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center_top,rgba(14,132,255,0.14),transparent_28%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom,rgba(0,118,255,0.06),transparent_40%)]" />
-      <aside className="fixed left-0 top-0 flex h-screen w-44 flex-col items-center justify-start border-r border-white/10 bg-black/80 pt-14 px-4 backdrop-blur-xl">
-        <div className="flex flex-col items-center gap-6 w-full">
+    <main className="relative min-h-screen overflow-x-hidden bg-[#000006] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_16%_20%,rgba(139,92,246,0.34),transparent_25%),radial-gradient(circle_at_78%_14%,rgba(37,99,235,0.2),transparent_28%),radial-gradient(circle_at_55%_90%,rgba(109,40,217,0.14),transparent_34%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(110deg,rgba(0,0,6,0.98)_0%,rgba(1,1,10,0.76)_44%,rgba(0,0,6,0.97)_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.68)_100%)]" />
+      <div className="pointer-events-none absolute left-[44%] top-10 h-[420px] w-[620px] -translate-x-1/2 rounded-full bg-violet-500/18 blur-3xl" />
+      <div className="pointer-events-none absolute right-16 top-20 h-[480px] w-[520px] rounded-full bg-blue-500/8 blur-3xl" />
+      <div className="pointer-events-none absolute left-44 right-0 top-[126px] h-[180px] opacity-80">
+        <img src="/hero-wavefield.svg" alt="" className="absolute inset-x-[-7%] top-[-92px] h-[360px] w-[114%] object-cover opacity-100 mix-blend-screen drop-shadow-[0_0_44px_rgba(217,70,239,0.72)] contrast-125 saturate-150" />
+        <div className="absolute inset-x-0 top-16 h-px bg-gradient-to-r from-transparent via-fuchsia-200/80 to-transparent shadow-[0_0_50px_rgba(217,70,239,1)]" />
+        <div className="absolute inset-x-0 top-24 h-24 bg-[radial-gradient(ellipse_at_20%_40%,rgba(217,70,239,0.42),transparent_20%),radial-gradient(ellipse_at_78%_35%,rgba(168,85,247,0.4),transparent_22%),radial-gradient(ellipse_at_50%_70%,rgba(37,99,235,0.14),transparent_30%)] blur-xl" />
+      </div>
+
+      <aside className="fixed left-0 top-0 z-30 flex h-screen w-[164px] flex-col border-r border-violet-200/10 bg-[linear-gradient(180deg,rgba(7,7,18,0.9),rgba(2,2,8,0.78))] px-4 py-8 shadow-[24px_0_90px_rgba(0,0,0,0.42),inset_-1px_0_0_rgba(255,255,255,0.035)] backdrop-blur-2xl">
+        <div className="mb-8 flex w-full justify-start">
+          <img src="/alex-logo.svg" alt="Alex by AIM" className="h-auto w-[120px]" />
+        </div>
+        <div className="flex w-full flex-col gap-2">
           {navItems.map((item) => (
             <Link
               key={item.label}
               href={item.href}
-              className="flex flex-col items-center gap-2 text-sm text-[#AED7FF] transition hover:text-white"
+              className={`group flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-medium text-violet-100/72 transition hover:bg-white/[0.06] hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.16),inset_0_1px_0_rgba(255,255,255,0.08)] ${item.href === '/' ? 'border border-violet-300/25 bg-[linear-gradient(135deg,rgba(124,58,237,0.28),rgba(31,20,58,0.62))] text-white shadow-[0_0_34px_rgba(139,92,246,0.25),inset_0_1px_0_rgba(255,255,255,0.12)]' : ''}`}
             >
-              <span className="flex h-16 w-16 items-center justify-center rounded-3xl border border-[#0ea5e9]/15 bg-black/40 text-[#0ea5e9] text-3xl shadow-[0_0_20px_rgba(14,165,233,0.15)]">
+              <span className="flex h-6 w-6 items-center justify-center text-xl text-violet-100 transition group-hover:text-white">
                 {item.icon}
               </span>
               <span>{item.label}</span>
             </Link>
           ))}
         </div>
+        <div className="mt-auto overflow-hidden rounded-[1.25rem] border border-violet-200/12 bg-[linear-gradient(150deg,rgba(255,255,255,0.075),rgba(124,58,237,0.05)_42%,rgba(0,0,0,0.16))] p-4 shadow-[0_24px_80px_rgba(0,0,0,0.42),0_0_34px_rgba(124,58,237,0.14),inset_0_1px_0_rgba(255,255,255,0.09)] backdrop-blur-2xl">
+          <p className="text-sm font-medium leading-6 text-white">Focus on your music.</p>
+          <p className="mt-1 text-sm leading-6 text-violet-100/85">Alex handles the rest.</p>
+          <div className="mt-5 h-20 rounded-xl bg-[url('/topography-field.svg'),radial-gradient(circle_at_70%_20%,rgba(168,85,247,0.48),transparent_36%),linear-gradient(135deg,rgba(18,12,42,0.9),rgba(4,5,18,0.95))] bg-cover bg-center shadow-[inset_0_0_42px_rgba(0,0,0,0.45)]" />
+        </div>
       </aside>
 
-      <section className="flex min-h-screen items-start justify-center px-8 py-4 pt-3 pl-48">
-        <div className="w-full max-w-[1080px] text-center">
-          <div className="relative mb-3 flex flex-col items-center">
-            <div className="mb-1.5 flex w-full items-center justify-center">
-              <img src="/aim-logo-v2.svg" alt="AIM" style={{ width: logoSize, height: 'auto' }} className="object-contain" />
-            </div>
-            <p className="text-center text-base uppercase tracking-[0.35em] text-[#B7C8DA]">
-              YOUR PARTNER IN THE MUSIC INDUSTRY
+      <section className="relative z-10 flex min-h-screen justify-center px-7 py-6 pl-[188px]">
+        <div className="w-full max-w-[1320px]">
+          <div className="mb-4 flex flex-col items-center text-center">
+            <img src="/alex-logo.svg" alt="Alex by AIM" style={{ width: Math.min(logoSize, 190), height: 'auto' }} className="object-contain drop-shadow-[0_0_28px_rgba(139,92,246,0.3)]" />
+            <p className="mt-3 text-sm font-semibold uppercase tracking-[0.62em] text-slate-100/90 drop-shadow-[0_0_14px_rgba(255,255,255,0.12)]">
+              Your <span className="text-fuchsia-300 drop-shadow-[0_0_16px_rgba(217,70,239,0.7)]">partner</span> in the music <span className="text-fuchsia-300 drop-shadow-[0_0_16px_rgba(217,70,239,0.7)]">industry</span>
             </p>
-
           </div>
 
-          {/* Slim ticker-style Industry Feed */}
-          <div className="mx-auto mb-2 mt-0 w-full max-w-[960px]">
-            <div className="overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/12 bg-[#05131f]/88 px-3 py-2 shadow-[0_0_40px_rgba(14,165,233,0.08)]">
+          <div className="mb-4 w-full">
+            <div className="overflow-hidden rounded-[1.45rem] border border-violet-200/14 bg-[linear-gradient(180deg,rgba(17,18,37,0.78),rgba(5,6,16,0.76))] px-4 py-3 shadow-[0_0_60px_rgba(124,58,237,0.2),0_18px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl">
               <div className="flex items-center gap-3 text-sm text-[#D7E6FF]">
-                <div className="flex-shrink-0 rounded-full border border-[#0ea5e9]/18 bg-[#0ea5e9]/8 px-2 py-0.5 text-[11px] uppercase tracking-[0.28em] text-[#B7D9FF]">
+                <div className="flex-shrink-0 rounded-full border border-violet-300/20 bg-violet-500/12 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-violet-100 shadow-[0_0_22px_rgba(139,92,246,0.22)]">
                   LIVE
                 </div>
+                <div className="hidden flex-shrink-0 text-xs font-semibold uppercase tracking-[0.32em] text-violet-200/80 sm:block">Industry intelligence</div>
                 <div className="min-w-0 flex-1 overflow-hidden">
-                  <div className="flex gap-4 animate-marquee-left hover:animation-play-state-paused whitespace-nowrap text-sm text-[#E7F1FF]">
+                  <div className="flex gap-3 animate-marquee-left hover:animation-play-state-paused whitespace-nowrap text-sm text-[#E7F1FF]">
                     {feedItems.concat(feedItems).map((item, index) => {
                       const id = typeof item === 'string' ? `feed-${index}` : item.id;
                       const title = typeof item === 'string' ? item : item.title;
@@ -603,7 +681,7 @@ export default function Home() {
                         <Link
                           key={`ticker-${index}`}
                           href={`/opportunities/${encodeURIComponent(id)}`}
-                          className="flex-shrink-0 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-[#D7E6FF] transition hover:border-[#0ea5ff]/30 hover:text-white"
+                          className="flex-shrink-0 rounded-full border border-white/10 bg-white/[0.045] px-4 py-2 text-sm font-medium text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.07)] transition hover:border-violet-300/35 hover:bg-violet-500/10 hover:text-white hover:shadow-[0_0_24px_rgba(139,92,246,0.18)]"
                         >
                           {title}
                         </Link>
@@ -620,42 +698,55 @@ export default function Home() {
             ` }} />
           </div>
 
-          {/* Chat panel */}
-          <div className="mx-auto mt-3 w-full max-w-[960px]">
-            <div className="flex h-[clamp(430px,56vh,520px)] flex-col overflow-hidden rounded-[1.5rem] border border-[#0ea5e9]/14 bg-white/[0.03] p-0 shadow-[0_20px_90px_rgba(10,132,255,0.12)] backdrop-blur-xl">
-              <div className="border-b border-white/8 bg-[#07131f]/80 px-6 py-2.5 text-left">
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-[#A8D9FF]">Alex</div>
-                <div className="mt-1 text-sm font-medium leading-6 text-[#E8F4FF]">
-                  Morning. What are we moving forward today — release, promo, or strategy?
+          <div className="grid w-full gap-5 xl:grid-cols-[1fr_320px]">
+            <div className="relative flex h-[clamp(500px,62vh,700px)] flex-col overflow-hidden rounded-[2rem] border border-violet-100/16 bg-[linear-gradient(145deg,rgba(8,9,24,0.9),rgba(1,2,10,0.92)_44%,rgba(7,5,18,0.94))] p-0 shadow-[0_48px_160px_rgba(0,0,0,0.86),0_0_128px_rgba(124,58,237,0.28),inset_0_1px_0_rgba(255,255,255,0.1),inset_0_0_86px_rgba(124,58,237,0.1)] backdrop-blur-2xl">
+              <div className="pointer-events-none absolute inset-0 rounded-[2rem] bg-[radial-gradient(circle_at_72%_18%,rgba(168,85,247,0.28),transparent_28%),radial-gradient(circle_at_16%_92%,rgba(37,99,235,0.12),transparent_34%),linear-gradient(180deg,rgba(255,255,255,0.035),transparent_22%)]" />
+              <div className="pointer-events-none absolute inset-0 rounded-[2rem] ring-1 ring-inset ring-white/6" />
+              <div className="pointer-events-none absolute right-[-6rem] top-[-8rem] h-72 w-72 rounded-full bg-violet-500/32 blur-3xl" />
+              <div className="pointer-events-none absolute right-[-2%] top-6 h-[430px] w-[78%] opacity-100 mix-blend-screen">
+                <img src="/chat-contour-field.svg" alt="" className="h-full w-full object-cover opacity-100 drop-shadow-[0_0_30px_rgba(217,70,239,0.52)] contrast-125 saturate-150" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_63%_44%,rgba(217,70,239,0.18),transparent_22%),linear-gradient(90deg,transparent,rgba(2,2,12,0.2)_78%)]" />
+              </div>
+              <div className="relative border-b border-white/8 bg-[linear-gradient(180deg,rgba(13,14,31,0.84),rgba(8,8,22,0.72))] px-7 py-4 text-left shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-2xl">
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <div className="text-xs font-semibold uppercase tracking-[0.26em] text-violet-200">Alex</div>
+                    <div className="mt-1 text-base font-medium leading-6 text-white">
+                  {alexGreeting}
+                    </div>
+                  </div>
+                  <div className="hidden rounded-full border border-violet-200/10 bg-violet-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-violet-100 sm:block">
+                    Manager online
+                  </div>
                 </div>
               </div>
 
-              <div ref={historyRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-6 py-4">
+              <div ref={historyRef} className="relative min-h-0 flex-1 space-y-4 overflow-y-auto px-7 py-6">
                 {messages.map((m) => (
-                  <div key={m.id} className="flex justify-start">
+                  <div key={m.id} className="relative flex justify-start">
                     <div className={
                       m.role === 'user'
-                        ? 'max-w-[82%] rounded-[1.15rem] border border-[#0ea5e9]/22 bg-[#0ea5e9]/14 px-4 py-3 text-left text-sm leading-7 text-[#F2FAFF] shadow-[0_8px_24px_rgba(14,165,233,0.08)]'
+                        ? 'max-w-[82%] rounded-[1.25rem] border border-violet-200/18 bg-[linear-gradient(145deg,rgba(124,58,237,0.34),rgba(63,40,138,0.52))] px-4 py-3 text-left text-sm leading-7 text-white shadow-[0_18px_48px_rgba(80,43,180,0.26),inset_0_1px_0_rgba(255,255,255,0.13)] backdrop-blur-xl'
                         : m.role === 'alex'
-                        ? 'max-w-[86%] rounded-[1.15rem] border border-white/8 bg-white/[0.035] px-4 py-3 text-left text-sm leading-7 text-[#D7E6FF] shadow-[0_8px_24px_rgba(10,132,255,0.05)]'
+                        ? 'max-w-[86%] rounded-[1.25rem] border border-white/12 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(255,255,255,0.035)_58%,rgba(124,58,237,0.055))] px-4 py-3 text-left text-sm leading-7 text-slate-200 shadow-[0_18px_50px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.09)] backdrop-blur-xl'
                         : m.role === 'action'
-                        ? 'max-w-[88%] rounded-[1.15rem] border border-[#0ea5ff]/24 bg-[#061229]/95 px-4 py-3 text-left text-sm leading-7 text-[#D7E6FF] shadow-[0_14px_40px_rgba(14,165,255,0.1)]'
+                        ? 'max-w-[88%] rounded-[1.25rem] border border-violet-200/22 bg-[linear-gradient(145deg,rgba(28,23,58,0.94),rgba(8,8,22,0.94))] px-4 py-3 text-left text-sm leading-7 text-slate-200 shadow-[0_20px_58px_rgba(124,58,237,0.22),inset_0_1px_0_rgba(255,255,255,0.1)] backdrop-blur-xl'
                         : 'max-w-[86%] rounded-[1.15rem] border border-[#ff4d4f]/20 bg-[#ff4d4f]/10 px-4 py-3 text-left text-sm leading-7 text-[#ffb3b3]'
                     }>
                       {m.role === 'action' && m.action ? (
                         <div>
                           <div className="flex flex-wrap items-start justify-between gap-3">
                             <div>
-                              <p className="text-xs uppercase tracking-[0.24em] text-[#8ec6ff]">Action detected</p>
+                              <p className="text-xs uppercase tracking-[0.24em] text-violet-200">Action detected</p>
                               <h3 className="mt-2 text-lg font-semibold text-white">{m.action.title}</h3>
                             </div>
-                            <span className="rounded-full bg-[#0ea5ff]/10 px-3 py-1 text-xs uppercase tracking-[0.18em] text-[#AED7FF]">
+                            <span className="rounded-full bg-violet-500/12 px-3 py-1 text-xs uppercase tracking-[0.18em] text-violet-100">
                               {m.action.destination}
                             </span>
                           </div>
                           <div className="mt-4 grid gap-3 sm:grid-cols-2">
                             <div className="rounded-[1rem] border border-white/10 bg-black/25 p-3">
-                              <p className="text-xs uppercase tracking-[0.2em] text-[#8ec6ff]">Assets included</p>
+                              <p className="text-xs uppercase tracking-[0.2em] text-violet-200">Assets included</p>
                               <div className="mt-2 space-y-1.5 text-sm text-[#D7E6FF]">
                                 {m.action.assetsIncluded.map((asset) => (
                                   <p key={asset}>{asset}</p>
@@ -663,13 +754,13 @@ export default function Home() {
                               </div>
                             </div>
                             <div className="rounded-[1rem] border border-white/10 bg-black/25 p-3">
-                              <p className="text-xs uppercase tracking-[0.2em] text-[#8ec6ff]">Suggested next step</p>
+                              <p className="text-xs uppercase tracking-[0.2em] text-violet-200">Suggested next step</p>
                               <p className="mt-2 text-sm leading-6 text-[#D7E6FF]">{m.action.suggestedNextStep}</p>
                             </div>
                           </div>
                           {m.action.missingInfo?.length ? (
                             <div className="mt-3 rounded-[1rem] border border-white/10 bg-white/[0.035] p-3">
-                              <p className="text-xs uppercase tracking-[0.2em] text-[#8ec6ff]">Missing details</p>
+                              <p className="text-xs uppercase tracking-[0.2em] text-violet-200">Missing details</p>
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {m.action.missingInfo.map((item) => (
                                   <span key={item} className="rounded-full bg-white/5 px-3 py-1 text-xs text-[#D7E6FF]">{item}</span>
@@ -720,12 +811,13 @@ export default function Home() {
                 ))}
                 {errorText ? <div className="text-sm text-[#ffb3b3]">{errorText}</div> : null}
               </div>
-              <div className="flex-shrink-0 border-t border-white/8 bg-[#050f19]/92 px-5 py-2.5">
+              <div className="relative flex-shrink-0 border-t border-white/8 bg-[linear-gradient(180deg,rgba(8,9,22,0.88),rgba(4,5,14,0.96))] px-5 py-3 shadow-[0_-24px_70px_rgba(0,0,0,0.32),inset_0_1px_0_rgba(255,255,255,0.055)] backdrop-blur-2xl">
+                <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-violet-300/35 to-transparent" />
                 <div className="mb-1.5 flex items-center gap-1.5 overflow-x-auto whitespace-nowrap">
                   {suggestions.map((s) => (
                     <button
                       key={s}
-                      className="flex-shrink-0 rounded-full border border-white/8 bg-transparent px-2.5 py-1 text-[11px] font-medium tracking-[0.08em] text-[#D7E6FF] transition hover:border-[#0ea5e9]/18 hover:bg-[#0ea5e9]/10"
+                      className="flex-shrink-0 rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium tracking-[0.08em] text-slate-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] transition hover:border-violet-300/25 hover:bg-violet-500/10 hover:shadow-[0_0_18px_rgba(139,92,246,0.14)]"
                       onClick={() => {
                         setInputValue(s);
                         inputRef.current?.focus();
@@ -743,7 +835,7 @@ export default function Home() {
                         key={attachment.id}
                         type="button"
                         onClick={() => removeAttachment(attachment.id)}
-                        className="rounded-full border border-[#0ea5e9]/16 bg-[#0ea5ff]/10 px-3 py-1 text-xs text-[#D7E6FF] transition hover:bg-[#0ea5ff]/15"
+                        className="rounded-full border border-violet-300/16 bg-violet-500/10 px-3 py-1 text-xs text-slate-200 transition hover:bg-violet-500/15"
                         title="Remove attachment"
                       >
                         {attachment.category} · {attachment.name} · {formatFileSize(attachment.size)} ×
@@ -757,7 +849,7 @@ export default function Home() {
                     type="button"
                     onClick={() => attachmentInputRef.current?.click()}
                     disabled={isLoading}
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full border border-[#0ea5e9]/18 bg-[#03101b]/96 text-xl font-semibold text-[#B7D9FF] transition hover:border-[#0ea5e9]/40 hover:bg-[#0ea5e9]/10 disabled:opacity-50"
+                    className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-violet-200/18 bg-[linear-gradient(145deg,rgba(255,255,255,0.08),rgba(124,58,237,0.08))] text-xl font-semibold text-violet-100 shadow-[0_12px_32px_rgba(0,0,0,0.28),inset_0_1px_0_rgba(255,255,255,0.09)] transition hover:border-violet-300/45 hover:bg-violet-500/12 hover:shadow-[0_0_24px_rgba(139,92,246,0.22)] disabled:opacity-50"
                     aria-label="Attach audio, image or PDF"
                   >
                     +
@@ -772,7 +864,7 @@ export default function Home() {
                   />
                   <textarea
                     ref={inputRef}
-                    className="min-h-[50px] flex-1 resize-none rounded-[0.875rem] border border-white/12 bg-[#03101b]/96 px-4 py-2 text-sm leading-6 text-white outline-none placeholder:text-[#C6E1FF] focus:border-[#0ea5e9]/40 focus:ring-2 focus:ring-[#0ea5e9]/12"
+                    className="min-h-[54px] flex-1 resize-none rounded-[1rem] border border-white/12 bg-[linear-gradient(180deg,rgba(13,14,29,0.96),rgba(5,6,17,0.96))] px-4 py-2.5 text-sm leading-6 text-white shadow-[0_16px_42px_rgba(0,0,0,0.34),inset_0_1px_0_rgba(255,255,255,0.08),inset_0_0_24px_rgba(124,58,237,0.055)] outline-none placeholder:text-slate-300/75 focus:border-violet-300/45 focus:ring-2 focus:ring-violet-500/15"
                     placeholder={placeholder}
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
@@ -780,7 +872,7 @@ export default function Home() {
                     disabled={isLoading}
                   />
                   <button
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-[#0ea5e9] text-lg font-bold text-black shadow-[0_0_25px_rgba(14,165,233,0.45)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 text-lg font-bold text-white shadow-[0_0_34px_rgba(139,92,246,0.52),0_14px_34px_rgba(79,70,229,0.28),inset_0_1px_0_rgba(255,255,255,0.24)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
                     onClick={handleSendMessage}
                     disabled={isLoading || (!inputValue.trim() && !attachments.length)}
                   >
@@ -789,15 +881,75 @@ export default function Home() {
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="mt-8 text-center">
-            <p className="text-xs text-[#B7C8DA] uppercase tracking-[0.2em] font-medium">
-              INSIGHTS. OPPORTUNITIES. CONNECTIONS. POWERED BY AIM.
-            </p>
+            <aside className="space-y-4">
+              <section className="relative overflow-hidden rounded-[1.5rem] border border-violet-100/14 bg-[linear-gradient(145deg,rgba(14,15,34,0.86),rgba(4,5,15,0.9))] p-5 shadow-[0_28px_100px_rgba(0,0,0,0.48),0_0_62px_rgba(124,58,237,0.16),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl">
+                <div className="pointer-events-none absolute right-[-80px] top-[-70px] h-44 w-44 rounded-full bg-violet-500/22 blur-3xl" />
+                <div className="pointer-events-none absolute inset-0 bg-[url('/topography-field.svg')] bg-[length:640px_278px] bg-[center_top_-72px] opacity-[0.16] mix-blend-screen" />
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white">Matched for you</p>
+                  <Link href="/opportunities" className="text-xs font-medium text-violet-200 transition hover:text-white">View all</Link>
+                </div>
+                <div className="space-y-3">
+                  {matchedForYou.map((item) => (
+                    <Link
+                      key={item.title}
+                      href="/opportunities"
+                      className="group relative flex items-start gap-3 rounded-[1.1rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.06),rgba(255,255,255,0.025))] p-3 shadow-[0_12px_36px_rgba(0,0,0,0.24),inset_0_1px_0_rgba(255,255,255,0.065)] transition hover:border-violet-300/30 hover:bg-violet-500/10 hover:shadow-[0_16px_42px_rgba(124,58,237,0.16)]"
+                    >
+                      <span className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${item.tone} shadow-[0_0_24px_rgba(139,92,246,0.18)]`}>
+                        ✦
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm leading-5 text-slate-100 group-hover:text-white">{item.title}</span>
+                        <span className="mt-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-violet-200/75">
+                          <span className="rounded-md bg-violet-500/12 px-2 py-0.5">{item.type}</span>
+                          <span>{item.time}</span>
+                        </span>
+                      </span>
+                      <span className="mt-1 h-2 w-2 rounded-full bg-lime-400 shadow-[0_0_12px_rgba(74,222,128,0.65)]" />
+                    </Link>
+                  ))}
+                </div>
+                <Link href="/opportunities" className="relative mt-4 flex items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 via-indigo-600 to-violet-700 px-4 py-3 text-sm font-semibold text-white shadow-[0_0_34px_rgba(139,92,246,0.3),inset_0_1px_0_rgba(255,255,255,0.18)] transition hover:brightness-110">
+                  See more opportunities
+                </Link>
+              </section>
+
+              <section className="relative overflow-hidden rounded-[1.5rem] border border-violet-100/14 bg-[linear-gradient(145deg,rgba(14,15,34,0.84),rgba(4,5,15,0.9))] p-5 shadow-[0_28px_95px_rgba(0,0,0,0.46),0_0_50px_rgba(124,58,237,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-2xl">
+                <div className="pointer-events-none absolute left-[-90px] bottom-[-90px] h-44 w-44 rounded-full bg-blue-500/14 blur-3xl" />
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="text-xs font-semibold uppercase tracking-[0.32em] text-white">Alex actions</p>
+                  <span className="text-xs font-medium text-violet-200">Live</span>
+                </div>
+                <div className="space-y-2.5">
+                  {alexActions.map((action) => (
+                    <button
+                      key={action.title}
+                      type="button"
+                      onClick={() => {
+                        setInputValue(action.title);
+                        inputRef.current?.focus();
+                      }}
+                      className="flex w-full items-center gap-3 rounded-[1rem] border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.055),rgba(255,255,255,0.022))] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.2),inset_0_1px_0_rgba(255,255,255,0.055)] transition hover:border-violet-300/30 hover:bg-violet-500/10 hover:shadow-[0_14px_38px_rgba(124,58,237,0.14)]"
+                    >
+                      <span className="h-4 w-4 flex-shrink-0 rounded-full border border-violet-200/35 bg-black/20 shadow-[0_0_18px_rgba(139,92,246,0.18),inset_0_0_8px_rgba(139,92,246,0.18)]" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-sm font-medium text-slate-100">{action.title}</span>
+                        <span className="mt-1 block text-xs leading-5 text-slate-400">{action.detail}</span>
+                      </span>
+                      <span className="text-violet-200">›</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            </aside>
           </div>
         </div>
       </section>
+      <div className="pointer-events-none fixed bottom-0 left-[164px] right-0 z-20 h-[76px] opacity-90 [mask-image:linear-gradient(to_top,black_16%,transparent)]">
+        <img src="/audio-spectrum.svg" alt="" className="h-full w-full object-cover object-bottom mix-blend-screen drop-shadow-[0_0_24px_rgba(217,70,239,0.8)] contrast-125 saturate-150" />
+      </div>
     </main>
   );
 }

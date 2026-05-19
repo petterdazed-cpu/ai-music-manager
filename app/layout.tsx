@@ -15,8 +15,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIM — AI Music Manager",
-  description: "A premium AI music manager prototype for artists, producers, and songwriters.",
+  title: "Alex by AIM — AI Music Manager",
+  description: "Create more. Manage less. A premium AI music manager for artists, producers, DJs, and songwriters.",
+  icons: {
+    icon: "/alex-logo.svg",
+  },
 };
 
 export default function RootLayout({

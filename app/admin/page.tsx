@@ -131,7 +131,7 @@ export default function Admin() {
             <button
               type="button"
               onClick={save}
-              className="px-6 py-3 bg-sky-500 text-white rounded-lg hover:bg-sky-600"
+              className="rounded-lg bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-6 py-3 text-white hover:brightness-110"
             >
               Save Changes
             </button>
@@ -144,7 +144,7 @@ export default function Admin() {
             </button>
           </div>
           {statusText ? (
-            <div className="rounded-2xl border border-sky-400/20 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+            <div className="rounded-2xl border border-violet-300/20 bg-violet-500/12 px-4 py-3 text-sm text-violet-100">
               {statusText}
             </div>
           ) : null}

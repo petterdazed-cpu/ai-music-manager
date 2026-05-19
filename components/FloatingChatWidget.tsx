@@ -23,6 +23,17 @@ const suggestionChips = [
   'Industry outreach',
   'Find sync opportunities',
 ];
+const managerSettingsStorageKey = 'aimManagerSettings';
+
+const loadStoredManagerSettings = () => {
+  const stored = window.localStorage.getItem(managerSettingsStorageKey);
+  if (!stored) return undefined;
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return undefined;
+  }
+};
 
 export default function FloatingChatWidget() {
   const [open, setOpen] = useState(false);
@@ -61,7 +72,11 @@ export default function FloatingChatWidget() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: trimmed, stream: false }),
+        body: JSON.stringify({
+          message: trimmed,
+          stream: false,
+          managerSettings: loadStoredManagerSettings(),
+        }),
       });
 
       const data = await response.json();
@@ -96,14 +111,14 @@ export default function FloatingChatWidget() {
   return (
     <div className="fixed bottom-6 right-6 z-50">
       {open ? (
-        <div className="w-[360px] max-w-[92vw] rounded-[2rem] border border-[#1E90FF]/20 bg-black/95 p-4 shadow-[0_35px_90px_rgba(30,144,255,0.24)] backdrop-blur-3xl">
-          <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-[#0b172b]/95 px-4 py-4 text-white">
+        <div className="w-[360px] max-w-[92vw] rounded-[2rem] border border-violet-300/20 bg-[#050510]/95 p-4 shadow-[0_35px_100px_rgba(124,58,237,0.28)] backdrop-blur-3xl">
+          <div className="flex items-center justify-between gap-3 rounded-[1.5rem] border border-white/10 bg-[#0A0B1B]/95 px-4 py-4 text-white">
             <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#1E90FF]/15 text-2xl text-[#1E90FF] shadow-[0_0_20px_rgba(30,144,255,0.2)]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 text-2xl font-semibold text-white shadow-[0_0_24px_rgba(139,92,246,0.35)]">
                 A
               </div>
               <div>
-                <p className="text-sm uppercase tracking-[0.28em] text-[#8ec6ff]">Alex</p>
+                <p className="text-sm uppercase tracking-[0.28em] text-violet-200">Alex</p>
                 <p className="text-base font-semibold">AI Music Manager</p>
               </div>
             </div>
@@ -119,19 +134,19 @@ export default function FloatingChatWidget() {
 
           <div
             ref={listRef}
-            className="mt-4 max-h-[320px] space-y-3 overflow-y-auto rounded-[1.5rem] border border-white/10 bg-[#08111f]/90 p-4 text-sm text-[#E5EAF8]"
+            className="mt-4 max-h-[320px] space-y-3 overflow-y-auto rounded-[1.5rem] border border-white/10 bg-[#080817]/90 p-4 text-sm text-[#E5EAF8]"
           >
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`rounded-3xl p-3 ${message.role === 'assistant' ? 'bg-[#11203a]/90 text-[#D7E6FF]' : 'bg-[#0a1528]/90 text-[#B3D2FF]'} ${message.role === 'user' ? 'ml-auto max-w-[85%]' : 'max-w-[90%]'}`}
+                className={`rounded-3xl p-3 ${message.role === 'assistant' ? 'bg-white/[0.055] text-slate-200' : 'bg-violet-500/14 text-white'} ${message.role === 'user' ? 'ml-auto max-w-[85%]' : 'max-w-[90%]'}`}
               >
                 {message.text}
               </div>
             ))}
             {typing && (
-              <div className="flex items-center gap-2 rounded-3xl bg-[#11203a]/90 px-3 py-2 text-sm text-[#B7D6FF]">
-                <span className="h-2.5 w-2.5 rounded-full bg-[#1E90FF] animate-pulse" />
+              <div className="flex items-center gap-2 rounded-3xl bg-white/[0.055] px-3 py-2 text-sm text-violet-100">
+                <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-violet-400" />
                 <span>Alex is typing...</span>
               </div>
             )}
@@ -144,7 +159,7 @@ export default function FloatingChatWidget() {
                   key={chip}
                   type="button"
                   onClick={() => applySuggestion(chip)}
-                  className="rounded-full border border-[#1E90FF]/20 bg-[#1E90FF]/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-[#D7E6FF] transition hover:bg-[#1E90FF]/15"
+                  className="rounded-full border border-violet-300/20 bg-violet-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-[0.24em] text-slate-200 transition hover:bg-violet-500/15"
                 >
                   {chip}
                 </button>
@@ -158,13 +173,13 @@ export default function FloatingChatWidget() {
                 onChange={(event) => setInputValue(event.target.value)}
                 onKeyDown={handleInputKeyDown}
                 placeholder="Send Alex a message..."
-                className="min-h-[52px] flex-1 resize-none rounded-[1.5rem] border border-white/10 bg-[#04101f]/90 px-4 py-3 text-sm text-white outline-none focus:border-[#1E90FF]/60 focus:ring-2 focus:ring-[#1E90FF]/20"
+                className="min-h-[52px] flex-1 resize-none rounded-[1.5rem] border border-white/10 bg-[#090A18]/90 px-4 py-3 text-sm text-white outline-none focus:border-violet-300/60 focus:ring-2 focus:ring-violet-500/20"
               />
               <button
                 type="button"
                 onClick={handleSend}
                 disabled={!inputValue.trim() || isSending}
-                className="inline-flex h-12 items-center justify-center rounded-full bg-[#1E90FF] px-5 text-sm font-semibold text-black transition hover:bg-[#4fb3ff] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex h-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-400 via-indigo-500 to-cyan-300 px-5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSending ? 'Sending...' : 'Send'}
               </button>
@@ -175,10 +190,10 @@ export default function FloatingChatWidget() {
         <button
           type="button"
           onClick={handleToggle}
-          className="widget-glow group relative flex h-16 w-16 items-center justify-center rounded-full border border-[#1E90FF]/30 bg-[#07142c]/95 text-[#D7E6FF] shadow-[0_20px_60px_rgba(30,144,255,0.24)] transition duration-300 hover:-translate-y-1 hover:bg-[#1E90FF]/20"
+          className="widget-glow group relative flex h-16 w-16 items-center justify-center rounded-full border border-violet-300/30 bg-[#080817]/95 text-white shadow-[0_20px_70px_rgba(124,58,237,0.32)] transition duration-300 hover:-translate-y-1 hover:bg-violet-500/20"
           aria-label="Open Alex chat"
         >
-          <span className="absolute inset-0 rounded-full bg-[#1E90FF]/20 blur-xl opacity-60" />
+          <span className="absolute inset-0 rounded-full bg-violet-500/25 opacity-70 blur-xl" />
           <span className="relative z-10 text-2xl">A</span>
         </button>
       )}
